@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="guys.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:guys"
+    Shell.FlyoutBehavior="Flyout"
+    Title="guys">
+
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Style x:Key="BaseStyle" TargetType="Element">
+                <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
+                <Setter Property="Shell.ForegroundColor" Value="White" />
+                <Setter Property="Shell.TitleColor" Value="White" />
+                <Setter Property="Shell.UnselectedColor" Value="#A8ADAA" />
+            </Style>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#512BD4" HeightRequest="150">
+            <Image Source="dotnet_bot.png" 
+                   VerticalOptions="Center" 
+                   HorizontalOptions="Center" 
+                   HeightRequest="100" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Navigation Principale" FlyoutDisplayOptions="AsMultipleItems">
+        <Tab Title="Accueil">
+            <ShellContent
+                Title="Home"
+                ContentTemplate="{DataTemplate local:MainPage}"
+                Route="MainPage" />
+        </Tab>
+
+        <Tab Title="Profil">
+            <ShellContent
+                Title="Profil"
+                ContentTemplate="{DataTemplate local:MainPage}" 
+                Route="ProfilePage" />
+        </Tab>
+
+        <Tab Title="Paramètres">
+            <ShellContent
+                Title="Settings"
+                ContentTemplate="{DataTemplate local:MainPage}"
+                Route="SettingsPage" />
+        </Tab>
+    </FlyoutItem>
+
+    <Shell.FlyoutFooter>
+        <StackLayout Padding="20">
+            <Label Text="Version 1.0" 
+                   HorizontalOptions="Center" 
+                   TextColor="Gray" />
+        </StackLayout>
+    </Shell.FlyoutFooter>
+
+</Shell>
