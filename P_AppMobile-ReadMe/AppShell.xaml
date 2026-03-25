@@ -4,12 +4,23 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:P_AppMobile_ReadMe"
-    Shell.FlyoutBehavior="Disabled"
-    Title="P_AppMobile_ReadMe">
+    Shell.FlyoutBehavior="Flyout"
+    Title="ReadMe"
+    Shell.BackgroundColor="White"
+    Shell.TitleColor="Black">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <Shell.ToolbarItems>
+        <ToolbarItem 
+            Text="Rechercher"
+            IconImageSource="search.png"
+            Order="Primary" />
+    </Shell.ToolbarItems>
+
+    <FlyoutItem Title="Accueil">
+        <ShellContent
+            Title="ReadMe"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="MainPage" />
+    </FlyoutItem>
 
 </Shell>
