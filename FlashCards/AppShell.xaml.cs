@@ -6,5 +6,8 @@
         {
             InitializeComponent();
         }
+
+        // Fallback si la éthode générée par le XAML est absente
+
     }
 }

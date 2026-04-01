@@ -3,28 +3,11 @@
     x:Class="FlashCards.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:FlashCards"
-    Shell.FlyoutBehavior="Flyout"
-    Title="Ozzlet"
-    Shell.BackgroundColor="White"
-    Shell.TitleColor="#5E61E6">
+    xmlns:local="clr-namespace:FlashCards">
 
-    <Shell.BackButtonBehavior>
-        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
-    </Shell.BackButtonBehavior>
-
-    <Shell.ToolbarItems>
-        <ToolbarItem 
-            Text="+ Créer" 
-            Order="Primary" 
-            Priority="0" />
-    </Shell.ToolbarItems>
-
-    <FlyoutItem Title="Ozzlet">
-        <ShellContent
-            Title="Ozzlet"
-            ContentTemplate="{DataTemplate local:MainPage}"
-            Route="MainPage" />
-    </FlyoutItem>
+    <ShellContent
+        Title="Decks"
+        ContentTemplate="{DataTemplate local:DecksPage}"
+        Route="DecksPage" />
 
 </Shell>

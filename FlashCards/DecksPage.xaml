@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FlashCards.DecksPage"
+             Title="Mes Decks">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="10">
+
+        <!-- Header with add button -->
+        <HorizontalStackLayout Grid.Row="0"
+                              Spacing="10"
+                              Margin="0,0,0,10">
+            <Entry x:Name="NewDeckEntry"
+                   Placeholder="Nom du nouveau deck"
+                   HorizontalOptions="FillAndExpand" />
+            <Button Text="Ajouter"
+                    Clicked="OnAddDeckClicked"
+                    BackgroundColor="#2196F3"
+                    TextColor="White" />
+        </HorizontalStackLayout>
+
+        <!-- Decks list -->
+        <CollectionView Grid.Row="1"
+                       x:Name="DecksCollectionView"
+                       SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5"
+                           Padding="10"
+                           BorderColor="LightGray"
+                           CornerRadius="8"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+
+                            <!-- Deck info -->
+                            <StackLayout Grid.Column="0"
+                                        VerticalOptions="Center">
+                                <Label Text="{Binding Name}"
+                                       FontSize="18"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding CardCount, StringFormat='{0} cartes'}"
+                                       FontSize="14"
+                                       TextColor="Gray" />
+                                <Label Text="{Binding CreatedDate, StringFormat='Créé le {0:dd/MM/yyyy}'}"
+                                       FontSize="12"
+                                       TextColor="LightGray" />
+                            </StackLayout>
+
+                            <!-- Edit button -->
+                            <Button Grid.Column="1"
+                                   Text="✏️"
+                                   FontSize="20"
+                                   BackgroundColor="Transparent"
+                                   Clicked="OnEditDeckClicked"
+                                   CommandParameter="{Binding .}" />
+
+                            <!-- Delete button -->
+                            <Button Grid.Column="2"
+                                   Text="🗑️"
+                                   FontSize="20"
+                                   BackgroundColor="Transparent"
+                                   Clicked="OnDeleteDeckClicked"
+                                   CommandParameter="{Binding .}" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <!-- Empty view -->
+            <CollectionView.EmptyView>
+                <StackLayout HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                    <Label Text="📚"
+                           FontSize="60"
+                           HorizontalOptions="Center" />
+                    <Label Text="Aucun deck"
+                           FontSize="18"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                    <Label Text="Créez votre premier deck ci-dessus"
+                           FontSize="14"
+                           TextColor="LightGray"
+                           HorizontalOptions="Center" />
+                </StackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Info bar -->
+        <Label Grid.Row="2"
+               x:Name="InfoLabel"
+               Text="Prêt"
+               FontSize="12"
+               TextColor="Gray"
+               HorizontalOptions="Center"
+               Margin="0,10,0,0" />
+    </Grid>
+
+</ContentPage>
