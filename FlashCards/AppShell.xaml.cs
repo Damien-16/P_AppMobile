@@ -5,9 +5,9 @@
         public AppShell()
         {
             InitializeComponent();
+
+            // Enregistrement de la route pour la page de modification
+            Routing.RegisterRoute("EditDeck", typeof(EditDeckPage));
         }
-
-        // Fallback si la éthode générée par le XAML est absente
-
     }
 }

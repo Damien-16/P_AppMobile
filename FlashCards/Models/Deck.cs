@@ -1,26 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace FlashCards.Models
 {
-    public class Deck
+    public class Deck : INotifyPropertyChanged
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; }
-        public int CardCount { get; set; }
+        private string _name;
+        private int _cardCount;
 
-        public Deck()
+        public int Id { get; set; }
+
+        public string Name
         {
-            CreatedDate = DateTime.Now;
+            get => _name;
+            set
+            {
+                _name = value;
+                OnPropertyChanged();
+            }
         }
 
-        public override string ToString()
+        public int CardCount
         {
-            return $"{Name} ({CardCount} cards)";
+            get => _cardCount;
+            set
+            {
+                _cardCount = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

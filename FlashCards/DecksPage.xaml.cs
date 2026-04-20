@@ -1,21 +1,20 @@
 using FlashCards.Models;
 using FlashCards.Services;
-using System.Collections.ObjectModel; 
-
+using System.Collections.ObjectModel;
 
 namespace FlashCards
 {
     public partial class DecksPage : ContentPage
     {
         private JsonDataService _dataService;
-        private ObservableCollection<Deck> _decks;  // List devient ObservableCollection
+        private ObservableCollection<Deck> _decks;
         private int _nextId = 1;
 
         public DecksPage()
         {
             InitializeComponent();
             _dataService = new JsonDataService();
-            _decks = new ObservableCollection<Deck>();  // new ObservableCollection
+            _decks = new ObservableCollection<Deck>();
             LoadDecks();
         }
 
@@ -23,7 +22,6 @@ namespace FlashCards
         {
             List<Deck> loadedDecks = await _dataService.LoadDecksAsync();
 
-            // Clear and repopulate ObservableCollection
             _decks.Clear();
             foreach (Deck deck in loadedDecks)
             {
@@ -35,7 +33,6 @@ namespace FlashCards
                 _nextId = _decks.Max(d => d.Id) + 1;
             }
 
-            // Assign ItemsSource ONCE (no need to reassign every time)
             if (DecksCollectionView.ItemsSource == null)
             {
                 DecksCollectionView.ItemsSource = _decks;
@@ -48,9 +45,10 @@ namespace FlashCards
         {
             InfoLabel.Text = $"{DateTime.Now:HH:mm:ss} - {message}";
         }
+
         private async void OnAddDeckClicked(object sender, EventArgs e)
         {
-            string? name = NewDeckEntry.Text?.Trim();
+            string name = NewDeckEntry.Text?.Trim();
 
             if (string.IsNullOrEmpty(name))
             {
@@ -62,46 +60,38 @@ namespace FlashCards
             {
                 Id = _nextId++,
                 Name = name,
-                CardCount = 0
+                CardCount = 0,
+                CreatedDate = DateTime.Now
             };
 
-            _decks.Add(newDeck);  // ? La vue se met à jour automatiquement !
+            _decks.Add(newDeck);
             await _dataService.SaveDecksAsync(_decks.ToList());
 
-            // RefreshView();  ? SUPPRIMÉ !
             NewDeckEntry.Text = string.Empty;
             UpdateInfo($"Ajouté: {name}");
         }
+
         private async void OnEditDeckClicked(object sender, EventArgs e)
         {
-            Button? button = sender as Button;
-            Deck? deck = button?.CommandParameter as Deck;
+            var button = sender as Button;
+            var deck = button?.CommandParameter as Deck;
 
             if (deck == null) return;
 
-            // Navigate to edit page using Shell
-            // Pass deck, dataService and decks list so EditDeckPage can save
-            Dictionary<string, object> navigationParameter = new Dictionary<string, object>
-    {
-        { "deck", deck },
-        { "dataService", _dataService },
-        { "decks", _decks }
-    };
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "deck", deck },
+                { "dataService", _dataService },
+                { "decks", _decks }
+            };
+
             await Shell.Current.GoToAsync("EditDeck", navigationParameter);
         }
 
-        // Refresh view when returning from edit page
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
-            // RefreshView();  ? SUPPRIMÉ !
-            // L'ObservableCollection met déjà à jour la vue automatiquement
-        }
         private async void OnDeleteDeckClicked(object sender, EventArgs e)
         {
-            Button? button = sender as Button;
-            Deck? deck = button?.CommandParameter as Deck;
+            var button = sender as Button;
+            var deck = button?.CommandParameter as Deck;
 
             if (deck == null) return;
 
@@ -114,13 +104,9 @@ namespace FlashCards
 
             if (!confirm) return;
 
-            _decks.Remove(deck);  // ? La vue se met à jour automatiquement !
+            _decks.Remove(deck);
             await _dataService.SaveDecksAsync(_decks.ToList());
-
-            // RefreshView();  ? SUPPRIMÉ !
             UpdateInfo($"Supprimé: {deck.Name}");
         }
     }
-
-
 }

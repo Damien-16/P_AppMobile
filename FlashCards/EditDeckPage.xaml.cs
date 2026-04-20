@@ -11,31 +11,27 @@ namespace FlashCards
         private JsonDataService _dataService;
         private ObservableCollection<Deck> _decks;
 
-
         public EditDeckPage()
         {
             InitializeComponent();
         }
 
-        // Receive navigation parameters
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue("deck", out object? deckObj) && deckObj is Deck deck)
+            if (query.TryGetValue("deck", out object deckObj) && deckObj is Deck deck)
             {
                 _deck = deck;
                 _cardCount = deck.CardCount;
-
-                // Initialize fields
                 NameEntry.Text = deck.Name;
                 CardCountLabel.Text = _cardCount.ToString();
             }
 
-            if (query.TryGetValue("dataService", out object? serviceObj) && serviceObj is JsonDataService service)
+            if (query.TryGetValue("dataService", out object serviceObj) && serviceObj is JsonDataService service)
             {
                 _dataService = service;
             }
 
-            if (query.TryGetValue("decks", out object? decksObj) && decksObj is ObservableCollection<Deck> decks)
+            if (query.TryGetValue("decks", out object decksObj) && decksObj is ObservableCollection<Deck> decks)
             {
                 _decks = decks;
             }
@@ -58,7 +54,7 @@ namespace FlashCards
 
         private async void OnSaveClicked(object sender, EventArgs e)
         {
-            string? newName = NameEntry.Text?.Trim();
+            string newName = NameEntry.Text?.Trim();
 
             if (string.IsNullOrWhiteSpace(newName))
             {
@@ -66,11 +62,11 @@ namespace FlashCards
                 return;
             }
 
-            // Update deck
+            // Mise à jour de l'objet (INotifyPropertyChanged fera le reste sur l'UI)
             _deck.Name = newName;
             _deck.CardCount = _cardCount;
 
-            // Save immediately to JSON
+            // Sauvegarde de l'état actuel de la liste
             await _dataService.SaveDecksAsync(_decks.ToList());
 
             await Shell.Current.GoToAsync("..");
