@@ -64,7 +64,6 @@ namespace FlashCards
 
             // Mise à jour de l'objet (INotifyPropertyChanged fera le reste sur l'UI)
             _deck.Name = newName;
-            _deck.CardCount = _cardCount;
 
             // Sauvegarde de l'état actuel de la liste
             await _dataService.SaveDecksAsync(_decks.ToList());

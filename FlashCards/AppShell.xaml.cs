@@ -5,9 +5,8 @@
         public AppShell()
         {
             InitializeComponent();
-
-            // Enregistrement de la route pour la page de modification
             Routing.RegisterRoute("EditDeck", typeof(EditDeckPage));
+            Routing.RegisterRoute("CardsPage", typeof(CardsPage)); // Nouvelle route
         }
     }
 }

@@ -60,7 +60,6 @@ namespace FlashCards
             {
                 Id = _nextId++,
                 Name = name,
-                CardCount = 0,
                 CreatedDate = DateTime.Now
             };
 
@@ -71,27 +70,45 @@ namespace FlashCards
             UpdateInfo($"Ajouté: {name}");
         }
 
-        private async void OnEditDeckClicked(object sender, EventArgs e)
+        // Nouvelle méthode pour le clic sur le cadre entier
+        private async void OnDeckTapped(object sender, EventArgs e)
         {
-            var button = sender as Button;
-            var deck = button?.CommandParameter as Deck;
+            // Le "sender" est le Frame sur lequel on a cliqué
+            var frame = sender as Frame;
+            // Le BindingContext du Frame est l'objet Deck correspondant
+            var deck = frame?.BindingContext as Deck;
 
             if (deck == null) return;
 
-            var navigationParameter = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object>
+            {
+                { "deck", deck },
+                { "decks", _decks }
+            };
+
+            await Shell.Current.GoToAsync("CardsPage", parameters);
+        }
+
+        private async void OnEditDeckClicked(object sender, EventArgs e)
+        {
+            Button button = sender as Button;
+            Deck deck = button?.CommandParameter as Deck;
+
+            if (deck == null) return;
+
+            Dictionary<string, object> navigationParameter = new Dictionary<string, object>
             {
                 { "deck", deck },
                 { "dataService", _dataService },
                 { "decks", _decks }
             };
-
             await Shell.Current.GoToAsync("EditDeck", navigationParameter);
         }
 
         private async void OnDeleteDeckClicked(object sender, EventArgs e)
         {
-            var button = sender as Button;
-            var deck = button?.CommandParameter as Deck;
+            Button button = sender as Button;
+            Deck deck = button?.CommandParameter as Deck;
 
             if (deck == null) return;
 
