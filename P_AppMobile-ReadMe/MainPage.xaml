@@ -26,6 +26,15 @@
                                 </VerticalStackLayout.GestureRecognizers>
                             </VerticalStackLayout>
 
+                            <Button Grid.Column="2"
+                            Text="🗑"
+                            FontSize="20"
+                            BackgroundColor="Transparent"
+                            TextColor="Red"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            Clicked="OnDeleteBookClicked"
+                            CommandParameter="{Binding .}" />
                         </Grid>
                     </Frame>
                 </DataTemplate>

@@ -100,11 +100,37 @@ namespace P_AppMobile_ReadMe
 
         private async void OnBookTapped(object sender, EventArgs e)
         {
+            // Navigation vers la page de détails existante
             await Shell.Current.GoToAsync("DetailsPage");
         }
+        private async void OnDeleteBookClicked(object sender, EventArgs e)
+        {
+            // 1. Récupérer le bouton qui a été cliqué
+            var button = (Button)sender;
 
-    }
+            // 2. Récupérer l'objet "Book" lié à ce bouton via le CommandParameter
+            var bookToDelete = (Book)button.CommandParameter;
 
-}
+            if (bookToDelete == null) return;
+
+            // 3. Demander confirmation à l'utilisateur
+            bool confirm = await DisplayAlert("Supprimer", $"Voulez-vous vraiment supprimer '{bookToDelete.Title}' ?", "Non", "Oui");
+
+            if (confirm)
+            {
+                // 4. Supprimer le fichier physique s'il existe (optionnel mais propre)
+                if (File.Exists(bookToDelete.FilePath))
+                {
+                    try { File.Delete(bookToDelete.FilePath); }
+                    catch (Exception ex) { Console.WriteLine($"Erreur suppression fichier: {ex.Message}"); }
+                }
+
+                // 5. Retirer de la liste affichée
+                Books.Remove(bookToDelete);
+
+                // 6. Sauvegarder la nouvelle liste dans le fichier JSON
+                await _bookService.SaveBooksAsync(Books.ToList());
+            }
+        }
     }
 }
