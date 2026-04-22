@@ -7,38 +7,57 @@ namespace FlashCards
     public partial class DecksPage : ContentPage
     {
         private JsonDataService _dataService;
-        private ObservableCollection<Deck> _decks;
+        private List<Deck> _decks;
+        private List<Deck> _filteredDecks;
+
         private int _nextId = 1;
 
         public DecksPage()
         {
             InitializeComponent();
             _dataService = new JsonDataService();
-            _decks = new ObservableCollection<Deck>();
+            _decks = new List<Deck>();
+            _filteredDecks = new List<Deck>();
+
             LoadDecks();
         }
 
         private async void LoadDecks()
         {
             List<Deck> loadedDecks = await _dataService.LoadDecksAsync();
-
-            _decks.Clear();
-            foreach (Deck deck in loadedDecks)
-            {
-                _decks.Add(deck);
-            }
+            _decks = loadedDecks ?? new List<Deck>();
 
             if (_decks.Any())
             {
                 _nextId = _decks.Max(d => d.Id) + 1;
             }
 
-            if (DecksCollectionView.ItemsSource == null)
+            ApplyFilter();
+            UpdateInfo($"Chargé: {_decks.Count} deck(s)");
+        }
+
+        private void ApplyFilter()
+        {
+            string search = SearchEntry?.Text?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(search))
             {
-                DecksCollectionView.ItemsSource = _decks;
+                _filteredDecks = _decks.ToList();
+            }
+            else
+            {
+                _filteredDecks = _decks
+                    .Where(d => d.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
-            UpdateInfo($"Chargé: {_decks.Count} deck(s)");
+            DecksCollectionView.ItemsSource = null;
+            DecksCollectionView.ItemsSource = _filteredDecks;
+        }
+
+        private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilter();
         }
 
         private void UpdateInfo(string message)
@@ -64,26 +83,26 @@ namespace FlashCards
             };
 
             _decks.Add(newDeck);
-            await _dataService.SaveDecksAsync(_decks.ToList());
+            await _dataService.SaveDecksAsync(_decks);
 
             NewDeckEntry.Text = string.Empty;
+            ApplyFilter(); // Rafraîchir l'affichage
             UpdateInfo($"Ajouté: {name}");
         }
 
-        // Nouvelle méthode pour le clic sur le cadre entier
         private async void OnDeckTapped(object sender, EventArgs e)
         {
-            // Le "sender" est le Frame sur lequel on a cliqué
             var frame = sender as Frame;
-            // Le BindingContext du Frame est l'objet Deck correspondant
             var deck = frame?.BindingContext as Deck;
 
             if (deck == null) return;
 
+            // ATTENTION : Si CardsPage attend une ObservableCollection, 
+            // il faut la créer ici, sinon la navigation va crasher !
             var parameters = new Dictionary<string, object>
             {
                 { "deck", deck },
-                { "decks", _decks }
+                { "decks", new ObservableCollection<Deck>(_decks) }
             };
 
             await Shell.Current.GoToAsync("CardsPage", parameters);
@@ -96,11 +115,11 @@ namespace FlashCards
 
             if (deck == null) return;
 
-            Dictionary<string, object> navigationParameter = new Dictionary<string, object>
+            var navigationParameter = new Dictionary<string, object>
             {
                 { "deck", deck },
                 { "dataService", _dataService },
-                { "decks", _decks }
+                { "decks", new ObservableCollection<Deck>(_decks) }
             };
             await Shell.Current.GoToAsync("EditDeck", navigationParameter);
         }
@@ -112,17 +131,12 @@ namespace FlashCards
 
             if (deck == null) return;
 
-            bool confirm = await DisplayAlert(
-                "Confirmation",
-                $"Voulez-vous vraiment supprimer '{deck.Name}' ?",
-                "Supprimer",
-                "Annuler"
-            );
-
+            bool confirm = await DisplayAlert("Confirmation", $"Supprimer '{deck.Name}' ?", "Supprimer", "Annuler");
             if (!confirm) return;
 
             _decks.Remove(deck);
-            await _dataService.SaveDecksAsync(_decks.ToList());
+            await _dataService.SaveDecksAsync(_decks);
+            ApplyFilter(); // Rafraîchir l'affichage
             UpdateInfo($"Supprimé: {deck.Name}");
         }
     }
