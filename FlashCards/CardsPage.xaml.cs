@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace FlashCards
 {
-    // On reçoit le deck et la liste globale pour pouvoir sauvegarder
+    // On reï¿½oit le deck et la liste globale pour pouvoir sauvegarder
     [QueryProperty(nameof(CurrentDeck), "deck")]
     [QueryProperty(nameof(AllDecks), "decks")]
     public partial class CardsPage : ContentPage
@@ -36,13 +36,28 @@ namespace FlashCards
             var newCard = new Card { Front = FrontEntry.Text, Back = BackEntry.Text };
             CurrentDeck.Cards.Add(newCard);
 
-            // On notifie que le nombre de cartes a changé pour l'écran précédent
+            // On notifie que le nombre de cartes a chang pour l'cran prcdent
             CurrentDeck.RefreshCardCount();
 
             await SaveData();
 
             FrontEntry.Text = string.Empty;
             BackEntry.Text = string.Empty;
+        }
+
+        private async void OnStudyClicked(object sender, EventArgs e)
+        {
+            if (CurrentDeck == null || CurrentDeck.Cards.Count == 0)
+            {
+                await DisplayAlert("Info", "Ajoutez des cartes avant d'apprendre !", "OK");
+                return;
+            }
+
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "deck", CurrentDeck }
+            };
+            await Shell.Current.GoToAsync("StudyPage", navigationParameter);
         }
 
         private async void OnDeleteCardClicked(object sender, EventArgs e)

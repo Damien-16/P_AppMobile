@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FlashCards.StudyPage"
+             Title="Apprentissage">
+
+    <Grid Padding="20" RowDefinitions="*,Auto,Auto">
+        
+        <!-- Card Display -->
+        <Frame Grid.Row="0" 
+               VerticalOptions="Center" 
+               HorizontalOptions="Fill" 
+               HeightRequest="300" 
+               CornerRadius="20" 
+               BackgroundColor="#F0F0F0">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFlipClicked" />
+            </Frame.GestureRecognizers>
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <Label x:Name="SideLabel" 
+                       Text="Recto" 
+                       FontSize="Caption" 
+                       TextColor="Gray" 
+                       HorizontalOptions="Center" />
+                <Label x:Name="CardTextLabel" 
+                       Text="Question" 
+                       FontSize="32" 
+                       FontAttributes="Bold" 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center" 
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Frame>
+
+        <Label Grid.Row="1" 
+               x:Name="ProgressLabel" 
+               Text="Carte 1 / 10" 
+               HorizontalOptions="Center" 
+               Margin="0,20" />
+
+        <HorizontalStackLayout Grid.Row="2" 
+                               HorizontalOptions="Center" 
+                               Spacing="20">
+            <Button Text="Précédent" Clicked="OnPreviousClicked" BackgroundColor="Gray" />
+            <Button Text="Retourner" Clicked="OnFlipClicked" BackgroundColor="#2196F3" />
+            <Button Text="Suivant" Clicked="OnNextClicked" BackgroundColor="#4CAF50" />
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentPage>

@@ -39,7 +39,7 @@
                             <TapGestureRecognizer Tapped="OnDeckTapped" />
                         </Frame.GestureRecognizers>
 
-                        <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                             <StackLayout Grid.Column="0"
                                          VerticalOptions="Center">
                                 <Label Text="{Binding Name}"
@@ -54,13 +54,20 @@
                             </StackLayout>
 
                             <Button Grid.Column="1"
+                                    Text="🎓"
+                                    FontSize="20"
+                                    BackgroundColor="Transparent"
+                                    Clicked="OnStudyDeckClicked"
+                                    CommandParameter="{Binding .}" />
+
+                            <Button Grid.Column="2"
                                     Text="✏️"
                                     FontSize="20"
                                     BackgroundColor="Transparent"
                                     Clicked="OnEditDeckClicked"
                                     CommandParameter="{Binding .}" />
 
-                            <Button Grid.Column="2"
+                            <Button Grid.Column="3"
                                     Text="🗑️"
                                     FontSize="20"
                                     BackgroundColor="Transparent"

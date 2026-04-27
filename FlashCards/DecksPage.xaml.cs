@@ -33,7 +33,7 @@ namespace FlashCards
             }
 
             ApplyFilter();
-            UpdateInfo($"Chargé: {_decks.Count} deck(s)");
+            UpdateInfo($"Chargï¿½: {_decks.Count} deck(s)");
         }
 
         private void ApplyFilter()
@@ -86,8 +86,8 @@ namespace FlashCards
             await _dataService.SaveDecksAsync(_decks);
 
             NewDeckEntry.Text = string.Empty;
-            ApplyFilter(); // Rafraîchir l'affichage
-            UpdateInfo($"Ajouté: {name}");
+            ApplyFilter(); // Rafraï¿½chir l'affichage
+            UpdateInfo($"Ajoutï¿½: {name}");
         }
 
         private async void OnDeckTapped(object sender, EventArgs e)
@@ -98,7 +98,7 @@ namespace FlashCards
             if (deck == null) return;
 
             // ATTENTION : Si CardsPage attend une ObservableCollection, 
-            // il faut la créer ici, sinon la navigation va crasher !
+            // il faut la crer ici, sinon la navigation va crasher !
             var parameters = new Dictionary<string, object>
             {
                 { "deck", deck },
@@ -106,6 +106,26 @@ namespace FlashCards
             };
 
             await Shell.Current.GoToAsync("CardsPage", parameters);
+        }
+
+        private async void OnStudyDeckClicked(object sender, EventArgs e)
+        {
+            Button button = sender as Button;
+            Deck deck = button?.CommandParameter as Deck;
+
+            if (deck == null) return;
+
+            if (deck.Cards.Count == 0)
+            {
+                await DisplayAlert("Info", "Ajoutez des cartes avant d'apprendre !", "OK");
+                return;
+            }
+
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "deck", deck }
+            };
+            await Shell.Current.GoToAsync("StudyPage", navigationParameter);
         }
 
         private async void OnEditDeckClicked(object sender, EventArgs e)
@@ -136,8 +156,8 @@ namespace FlashCards
 
             _decks.Remove(deck);
             await _dataService.SaveDecksAsync(_decks);
-            ApplyFilter(); // Rafraîchir l'affichage
-            UpdateInfo($"Supprimé: {deck.Name}");
+            ApplyFilter(); // Rafraï¿½chir l'affichage
+            UpdateInfo($"Supprimï¿½: {deck.Name}");
         }
     }
 }

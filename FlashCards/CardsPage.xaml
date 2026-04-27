@@ -10,6 +10,7 @@
             <Entry x:Name="FrontEntry" Placeholder="Recto (Question)" />
             <Entry x:Name="BackEntry" Placeholder="Verso (Réponse)" />
             <Button Text="Ajouter la carte" Clicked="OnAddCardClicked" BackgroundColor="#2196F3" />
+            <Button Text="Apprendre ce Deck" Clicked="OnStudyClicked" BackgroundColor="#4CAF50" />
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1" x:Name="CardsCollectionView">

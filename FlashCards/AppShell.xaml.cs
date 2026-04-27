@@ -6,7 +6,8 @@
         {
             InitializeComponent();
             Routing.RegisterRoute("EditDeck", typeof(EditDeckPage));
-            Routing.RegisterRoute("CardsPage", typeof(CardsPage)); // Nouvelle route
+            Routing.RegisterRoute("CardsPage", typeof(CardsPage));
+            Routing.RegisterRoute("StudyPage", typeof(StudyPage));
         }
     }
 }
