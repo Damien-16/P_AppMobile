@@ -100,8 +100,21 @@ namespace P_AppMobile_ReadMe
 
         private async void OnBookTapped(object sender, EventArgs e)
         {
-            // Navigation vers la page de détails existante
-            await Shell.Current.GoToAsync("DetailsPage");
+            // 1. Récupérer l'élément cliqué (Frame ou VerticalStackLayout)
+            var layout = (BindableObject)sender;
+            var selectedBook = (Book)layout.BindingContext;
+
+            if (selectedBook != null)
+            {
+                // 2. Préparer le paramètre de navigation
+                var navigationParameter = new Dictionary<string, object>
+        {
+            { "SelectedBook", selectedBook }
+        };
+
+                // 3. Naviguer vers la page de détails avec l'objet Book
+                await Shell.Current.GoToAsync("DetailsPage", navigationParameter);
+            }
         }
         private async void OnDeleteBookClicked(object sender, EventArgs e)
         {
@@ -114,21 +127,15 @@ namespace P_AppMobile_ReadMe
             if (bookToDelete == null) return;
 
             // 3. Demander confirmation à l'utilisateur
-            bool confirm = await DisplayAlert("Supprimer", $"Voulez-vous vraiment supprimer '{bookToDelete.Title}' ?", "Non", "Oui");
+            bool confirm = await DisplayAlert("Supprimer", $"Voulez-vous vraiment supprimer '{bookToDelete.Title}' ?", "Oui", "Non");
 
             if (confirm)
             {
-                // 4. Supprimer le fichier physique s'il existe (optionnel mais propre)
-                if (File.Exists(bookToDelete.FilePath))
-                {
-                    try { File.Delete(bookToDelete.FilePath); }
-                    catch (Exception ex) { Console.WriteLine($"Erreur suppression fichier: {ex.Message}"); }
-                }
 
-                // 5. Retirer de la liste affichée
+                // 4. Retirer de la liste affichée
                 Books.Remove(bookToDelete);
 
-                // 6. Sauvegarder la nouvelle liste dans le fichier JSON
+                // 5. Sauvegarder la nouvelle liste dans le fichier JSON
                 await _bookService.SaveBooksAsync(Books.ToList());
             }
         }
