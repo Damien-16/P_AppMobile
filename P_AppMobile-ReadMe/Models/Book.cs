@@ -12,6 +12,7 @@ namespace P_AppMobile_ReadMe.Models
         public string Title { get; set; } = string.Empty;
         public string FileName { get; set; } = string.Empty;
         public string FilePath { get; set; } = string.Empty;
+        public string CoverImagePath { get; set; } = string.Empty;
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
         public string DisplayDate => $"Ajouté le: {DateAdded:dd.MM.yyyy}";

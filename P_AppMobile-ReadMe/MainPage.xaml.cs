@@ -77,12 +77,22 @@ namespace P_AppMobile_ReadMe
                         await sourceStream.CopyToAsync(targetStream);
                     }
 
-                    // 5. Création de l'objet et mise à jour de la liste
+                    // 5. Extraction et sauvegarde de l'image de couverture
+                    string coverImagePath = string.Empty;
+                    if (epubBook.CoverImage != null)
+                    {
+                        string coverFileName = Path.GetFileNameWithoutExtension(result.FileName) + "_cover.jpg";
+                        coverImagePath = Path.Combine(localFolder, coverFileName);
+                        await File.WriteAllBytesAsync(coverImagePath, epubBook.CoverImage);
+                    }
+
+                    // 6. Création de l'objet et mise à jour de la liste
                     var newBook = new Book
                     {
                         Title = title,
                         FileName = result.FileName,
                         FilePath = targetPath,
+                        CoverImagePath = coverImagePath,
                         DateAdded = DateTime.Now
                     };
 

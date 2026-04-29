@@ -15,7 +15,7 @@ public partial class DetailPage : ContentPage
         {
             _selectedBook = value;
             OnPropertyChanged();
-            // Charger le contenu dès que l'objet livre est reçu
+            // Charger le contenu des que l'objet livre est reÃ§u
             LoadEpubText();
         }
     }
@@ -35,15 +35,14 @@ public partial class DetailPage : ContentPage
             // 1. Ouvrir le livre EPUB
             var epubBook = await EpubReader.ReadBookAsync(SelectedBook.FilePath);
 
-            // 2. Extraire et concaténer le texte de tous les chapitres
+            // 2. Extraire et concatÃ©ner le texte de tous les chapitres
             string fullText = "";
             foreach (var localTextContentFile in epubBook.ReadingOrder)
             {
-                // On récupère le contenu HTML du chapitre
                 string htmlContent = localTextContentFile.Content;
 
-                // On enlève les balises HTML pour avoir du texte brut (comme votre exemple)
-                string plainText = Regex.Replace(htmlContent, "<.*?>", string.Empty);
+                // Nettoyage plus robuste du HTML
+                string plainText = CleanHtml(htmlContent);
 
                 fullText += plainText + "\n\n";
             }
@@ -56,5 +55,35 @@ public partial class DetailPage : ContentPage
             BookContentLabel.Text = "Erreur lors de la lecture du fichier EPUB.";
             await DisplayAlert("Erreur", ex.Message, "OK");
         }
+    }
+
+    private string CleanHtml(string html)
+    {
+        if (string.IsNullOrEmpty(html)) return "";
+
+        // 1. Supprimer le bloc <head> et son contenu
+        html = Regex.Replace(html, "<head.*?>.*?</head>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+        // 2. Supprimer les styles et scripts
+        html = Regex.Replace(html, "<style.*?>.*?</style>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        html = Regex.Replace(html, "<script.*?>.*?</script>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+        // 3. Remplacer les balises de bloc par des retours Ã  la ligne pour garder la structure
+        html = Regex.Replace(html, "<p.*?>", "\n", RegexOptions.IgnoreCase);
+        html = Regex.Replace(html, "<h[1-6].*?>", "\n\n", RegexOptions.IgnoreCase);
+        html = Regex.Replace(html, "</p>", "\n", RegexOptions.IgnoreCase);
+        html = Regex.Replace(html, "</h[1-6]>", "\n", RegexOptions.IgnoreCase);
+        html = Regex.Replace(html, "<div.*?>", "\n", RegexOptions.IgnoreCase);
+
+        // 4. Supprimer toutes les autres balises HTML
+        string plainText = Regex.Replace(html, "<.*?>", string.Empty, RegexOptions.Singleline);
+
+        // 5. DÃ©coder les entitÃ©s HTML (ex: &nbsp; -> espace, &eacute; -> Ã©)
+        plainText = System.Net.WebUtility.HtmlDecode(plainText);
+
+        // 6. Nettoyer les espaces et retours Ã  la ligne multiples
+        plainText = Regex.Replace(plainText, @"\n\s*\n", "\n\n");
+
+        return plainText.Trim();
     }
 }
