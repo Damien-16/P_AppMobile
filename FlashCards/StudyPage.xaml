@@ -8,6 +8,7 @@
         
         <!-- Card Display -->
         <Frame Grid.Row="0" 
+               x:Name="CardFrame"
                VerticalOptions="Center" 
                HorizontalOptions="Fill" 
                HeightRequest="300" 
@@ -38,13 +39,82 @@
                HorizontalOptions="Center" 
                Margin="0,20" />
 
-        <HorizontalStackLayout Grid.Row="2" 
-                               HorizontalOptions="Center" 
-                               Spacing="20">
-            <Button Text="Précédent" Clicked="OnPreviousClicked" BackgroundColor="Gray" />
-            <Button Text="Retourner" Clicked="OnFlipClicked" BackgroundColor="#2196F3" />
-            <Button Text="Suivant" Clicked="OnNextClicked" BackgroundColor="#4CAF50" />
-        </HorizontalStackLayout>
+        <Label Grid.Row="1"
+               x:Name="TimerLabel"
+               Text="00:00"
+               HorizontalOptions="End"
+               Margin="0,20,10,20"
+               TextColor="Gray" />
+
+        <!-- Study Controls -->
+        <Grid Grid.Row="2" x:Name="StudyControls" ColumnDefinitions="*,*,*" ColumnSpacing="10">
+            <Button Grid.Column="0" Text="Faux (⬅️)" Clicked="OnIncorrectClicked" BackgroundColor="#F44336" TextColor="White" />
+            <Button Grid.Column="1" Text="Retourner" Clicked="OnFlipClicked" BackgroundColor="#2196F3" TextColor="White" />
+            <Button Grid.Column="2" Text="Juste (➡️)" Clicked="OnCorrectClicked" BackgroundColor="#4CAF50" TextColor="White" />
+        </Grid>
+
+        <!-- Stats View (Matching resultat.png) -->
+        <Grid Grid.Row="0" Grid.RowSpan="3" x:Name="StatsView" IsVisible="False" BackgroundColor="#4E5DED">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <VerticalStackLayout VerticalOptions="Center" Spacing="30" Padding="20">
+                <!-- Icon and Title -->
+                <Label Text="📊" FontSize="60" HorizontalOptions="Center" TextColor="White" />
+                <Label Text="Session Terminée" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White" />
+
+                <!-- Top Row Stats -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                    <Frame Grid.Column="0" BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15">
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                            <Label Text="⏱️" FontSize="24" HorizontalOptions="Center" />
+                            <Label x:Name="TimeLabel" Text="1 m 55s" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                            <Label Text="Temps passé" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="1" BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15">
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                            <Label Text="✅" FontSize="24" HorizontalOptions="Center" />
+                            <Label x:Name="PercentageLabel" Text="33%" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                            <Label Text="Correcte" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+
+                <!-- Bottom Row (Difficult item - optional/placeholder) -->
+                <Frame BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15" WidthRequest="180" HorizontalOptions="Center">
+                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                        <Label Text="❌" FontSize="24" HorizontalOptions="Center" />
+                        <Label x:Name="HardestCardLabel" Text="Card" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                        <Label Text="Le plus dure" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Bottom Buttons Container -->
+            <Frame Grid.Row="1" BackgroundColor="White" CornerRadius="30,30,0,0" Padding="30" Margin="0" HasShadow="False" BorderColor="Transparent">
+                <VerticalStackLayout Spacing="15">
+                    <Button Text="🔄 Recommencer" 
+                            Clicked="OnRestartClicked" 
+                            BackgroundColor="#5E69EE" 
+                            TextColor="White" 
+                            HeightRequest="60" 
+                            CornerRadius="15" 
+                            FontSize="18" 
+                            FontAttributes="Bold" />
+                    <Button Text="Retour au menu" 
+                            Clicked="OnBackToDecksClicked" 
+                            BackgroundColor="#F1F4F8" 
+                            TextColor="Black" 
+                            HeightRequest="60" 
+                            CornerRadius="15" 
+                            FontSize="18" />
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
 
     </Grid>
 </ContentPage>
