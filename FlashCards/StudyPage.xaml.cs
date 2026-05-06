@@ -32,6 +32,44 @@ namespace FlashCards
             InitializeComponent();
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            if (Accelerometer.Default.IsSupported)
+            {
+                if (!Accelerometer.Default.IsMonitoring)
+                {
+                    Accelerometer.Default.ShakeDetected += Accelerometer_ShakeDetected;
+                    Accelerometer.Default.Start(SensorSpeed.UI);
+                }
+            }
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            if (Accelerometer.Default.IsSupported)
+            {
+                if (Accelerometer.Default.IsMonitoring)
+                {
+                    Accelerometer.Default.Stop();
+                    Accelerometer.Default.ShakeDetected -= Accelerometer_ShakeDetected;
+                }
+            }
+        }
+
+        private void Accelerometer_ShakeDetected(object sender, EventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Only trigger if we are currently studying (controls are visible)
+                if (StudyControls.IsVisible)
+                {
+                    OnIncorrectClicked(null, null);
+                }
+            });
+        }
+
         private void InitializeStudy()
         {
             if (CurrentDeck != null && CurrentDeck.Cards.Count > 0)

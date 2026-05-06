@@ -95,7 +95,7 @@
             </VerticalStackLayout>
 
             <!-- Bottom Buttons Container -->
-            <Frame Grid.Row="1" BackgroundColor="White" CornerRadius="30,30,0,0" Padding="30" Margin="0" HasShadow="False" BorderColor="Transparent">
+            <Frame Grid.Row="1" BackgroundColor="White" Padding="30" Margin="0" HasShadow="False" BorderColor="Transparent">
                 <VerticalStackLayout Spacing="15">
                     <Button Text="🔄 Recommencer" 
                             Clicked="OnRestartClicked" 
