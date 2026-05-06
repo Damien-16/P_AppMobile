@@ -24,7 +24,8 @@
             HeightRequest="60"
             CornerRadius="15"
             FontSize="20"
-            CharacterSpacing="1" />
+            CharacterSpacing="1"
+            Clicked="OnLearnClicked" />
 
         <Button
             Text="Gerer mes cartes"
@@ -34,7 +35,8 @@
             BorderWidth="1"
             HeightRequest="60"
             CornerRadius="15"
-            FontSize="20" />
+            FontSize="20"
+            Clicked="OnManageDecksClicked" />
 
     </VerticalStackLayout>
 

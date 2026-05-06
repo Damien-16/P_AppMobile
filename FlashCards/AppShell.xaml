@@ -6,6 +6,11 @@
     xmlns:local="clr-namespace:FlashCards">
 
     <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+
+    <ShellContent
         Title="Decks"
         ContentTemplate="{DataTemplate local:DecksPage}"
         Route="DecksPage" />
