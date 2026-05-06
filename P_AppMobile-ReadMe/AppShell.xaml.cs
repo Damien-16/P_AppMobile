@@ -1,4 +1,4 @@
-﻿namespace P_AppMobile_ReadMe
+namespace P_AppMobile_ReadMe
 {
     public partial class AppShell : Shell
     {

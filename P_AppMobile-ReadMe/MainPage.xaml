@@ -33,7 +33,7 @@
                             Text="🗑"
                             FontSize="20"
                             BackgroundColor="Transparent"
-                            TextColor="Red"
+                            TextColor="Red" 
                             VerticalOptions="Center"
                             HorizontalOptions="End"
                             Clicked="OnDeleteBookClicked"

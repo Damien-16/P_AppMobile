@@ -20,6 +20,38 @@ public partial class DetailPage : ContentPage
         }
     }
 
+    private List<string> _pages = new List<string>();
+    private int _currentPageIndex = 0;
+    private const int CharsPerPage = 1200; // Ajustable en fonction de la taille de l'écran
+
+    private string _currentPageText;
+    public string CurrentPageText
+    {
+        get => _currentPageText;
+        set { _currentPageText = value; OnPropertyChanged(); }
+    }
+
+    private double _progressValue;
+    public double ProgressValue
+    {
+        get => _progressValue;
+        set { _progressValue = value; OnPropertyChanged(); }
+    }
+
+    private string _pageIndicator;
+    public string PageIndicator
+    {
+        get => _pageIndicator;
+        set { _pageIndicator = value; OnPropertyChanged(); }
+    }
+
+    private bool _isCoverVisible;
+    public bool IsCoverVisible
+    {
+        get => _isCoverVisible;
+        set { _isCoverVisible = value; OnPropertyChanged(); }
+    }
+
     public DetailPage()
     {
         InitializeComponent();
@@ -47,14 +79,92 @@ public partial class DetailPage : ContentPage
                 fullText += plainText + "\n\n";
             }
 
-            // 3. Afficher le texte dans la Label
-            BookContentLabel.Text = fullText.Trim();
+            // Paginer le texte
+            fullText = fullText.Trim();
+            PaginateText(fullText);
         }
         catch (Exception ex)
         {
-            BookContentLabel.Text = "Erreur lors de la lecture du fichier EPUB.";
+            CurrentPageText = "Erreur lors de la lecture du fichier EPUB.";
             await DisplayAlert("Erreur", ex.Message, "OK");
         }
+    }
+
+    private void PaginateText(string fullText)
+    {
+        _pages.Clear();
+        
+        // Séparer le texte par paragraphes (en utilisant les retours à la ligne)
+        // Le nettoyage HTML a déjà remplacé les blocs par des sauts de ligne
+        string[] paragraphs = fullText.Split(new[] { "\n\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        
+        string currentPageText = "";
+        
+        foreach (var paragraph in paragraphs)
+        {
+            // Si on dépasse la limite et qu'on a déjà du texte sur la page, on crée une nouvelle page
+            if (currentPageText.Length + paragraph.Length > CharsPerPage && currentPageText.Length > 0)
+            {
+                _pages.Add(currentPageText.Trim());
+                currentPageText = paragraph + "\n\n";
+            }
+            else
+            {
+                currentPageText += paragraph + "\n\n";
+            }
+        }
+        
+        // Ajouter le texte restant comme dernière page
+        if (!string.IsNullOrWhiteSpace(currentPageText))
+        {
+            _pages.Add(currentPageText.Trim());
+        }
+
+        if (_pages.Count == 0)
+        {
+            _pages.Add("");
+        }
+
+        _currentPageIndex = 0;
+        UpdatePageDisplay();
+    }
+
+    private void UpdatePageDisplay()
+    {
+        if (_pages.Count == 0) return;
+
+        CurrentPageText = _pages[_currentPageIndex];
+        PageIndicator = $"{_currentPageIndex + 1}/{_pages.Count}";
+        ProgressValue = _pages.Count > 1 ? (double)_currentPageIndex / (_pages.Count - 1) : 1.0;
+        IsCoverVisible = _currentPageIndex == 0;
+    }
+
+    private void OnPreviousClicked(object sender, EventArgs e)
+    {
+        if (_currentPageIndex > 0)
+        {
+            _currentPageIndex--;
+            UpdatePageDisplay();
+        }
+    }
+
+    private void OnNextClicked(object sender, EventArgs e)
+    {
+        if (_currentPageIndex < _pages.Count - 1)
+        {
+            _currentPageIndex++;
+            UpdatePageDisplay();
+        }
+    }
+
+    private async void OnBackTapped(object sender, TappedEventArgs e)
+    {
+        await Shell.Current.GoToAsync("..");
+    }
+
+    private void OnMenuTapped(object sender, TappedEventArgs e)
+    {
+        Shell.Current.FlyoutIsPresented = !Shell.Current.FlyoutIsPresented;
     }
 
     private string CleanHtml(string html)

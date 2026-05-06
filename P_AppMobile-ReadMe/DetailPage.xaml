@@ -2,30 +2,58 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="P_AppMobile_ReadMe.DetailPage"
-             Title="Lecture">
+             Shell.NavBarIsVisible="False"
+             Title="Lecture"
+             BackgroundColor="White">
 
-    <ScrollView Padding="20">
-        <VerticalStackLayout Spacing="15">
-            <Image 
-                Source="{Binding SelectedBook.CoverImagePath}"
-                HeightRequest="300"
-                Aspect="AspectFit"
-                HorizontalOptions="Center" />
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,20">
+            <!-- Hamburger menu -->
+            <Label Grid.Column="0" Text="&#x2630;" FontSize="32" TextColor="Black" VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+            
+            <Label Grid.Column="1" Text="{Binding SelectedBook.Title, TargetNullValue='Le livre'}" 
+                   FontSize="24" TextColor="Black" HorizontalOptions="Center" VerticalOptions="Center" />
+                   
+            <!-- Back chevron -->
+            <Label Grid.Column="2" Text="&lt;" FontSize="32" TextColor="Black" VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
 
-            <Label 
-                Text="{Binding SelectedBook.Title}"
-                FontSize="24"
-                FontAttributes="Bold"
-                HorizontalOptions="Center"
-                HorizontalTextAlignment="Center" />
+        <!-- Progress Bar -->
+        <ProgressBar Grid.Row="1" Progress="{Binding ProgressValue}" ProgressColor="Black" BackgroundColor="#E0E0E0" Margin="0,0,0,20" HeightRequest="8" />
 
-            <BoxView HeightRequest="1" Color="LightGray" Margin="0,5,0,10" />
+        <!-- Content -->
+        <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="15">
+                <!-- Cover Image visible only on first page -->
+                <Image 
+                    Source="{Binding SelectedBook.CoverImagePath}"
+                    IsVisible="{Binding IsCoverVisible}"
+                    HeightRequest="300"
+                    Aspect="AspectFit"
+                    HorizontalOptions="Center" />
+                    
+                <Label Text="{Binding CurrentPageText}" FontSize="16" TextColor="Black" LineBreakMode="WordWrap" />
+            </VerticalStackLayout>
+        </ScrollView>
 
-            <Label 
-                x:Name="BookContentLabel"
-                Text="Chargement du texte..."
-                FontSize="16"
-                LineBreakMode="WordWrap" />
-        </VerticalStackLayout>
-    </ScrollView>
+        <!-- Footer / Navigation -->
+        <Grid Grid.Row="3" ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" ColumnSpacing="20" Margin="0,20,0,0">
+            <Button Grid.Row="0" Grid.Column="0" Text="&#x2190;" FontSize="24" TextColor="Black" BackgroundColor="#D3D3D3" CornerRadius="8" Clicked="OnPreviousClicked" />
+            <Button Grid.Row="0" Grid.Column="1" Text="&#x2192;" FontSize="24" TextColor="Black" BackgroundColor="#D3D3D3" CornerRadius="8" Clicked="OnNextClicked" />
+            
+            <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PageIndicator}" TextColor="Black" HorizontalOptions="Center" Margin="0,10,0,0" FontSize="14" />
+        </Grid>
+
+    </Grid>
+
 </ContentPage>
