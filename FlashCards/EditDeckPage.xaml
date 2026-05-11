@@ -2,46 +2,76 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FlashCards.EditDeckPage"
-             Title="Modifier le deck">
+             Title="Modifier le deck"
+             BackgroundColor="{StaticResource PageBackground}">
 
-    <StackLayout Padding="20" Spacing="15">
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="16">
 
-        <Label Text="Nom du deck"
-               FontSize="16"
-               FontAttributes="Bold" />
+            <!-- Deck Name -->
+            <Label Text="Nom du deck"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextSecondary}"
+                   Margin="4,0,0,4" />
 
-        <Entry x:Name="NameEntry"
-               Placeholder="Nom du deck"
-               FontSize="18" />
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   BorderColor="{StaticResource Gray200}"
+                   CornerRadius="12"
+                   Padding="12,4"
+                   HasShadow="False">
+                <Entry x:Name="NameEntry"
+                       Placeholder="Nom du deck"
+                       PlaceholderColor="{StaticResource TextMuted}"
+                       TextColor="{StaticResource TextPrimary}"
+                       BackgroundColor="Transparent"
+                       FontSize="16" />
+            </Frame>
 
-        <Label Text="Nombre de cartes"
-               FontSize="16"
-               FontAttributes="Bold"
-               Margin="0,20,0,0" />
+            <!-- Card Count -->
+            <Label Text="Nombre de cartes"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextSecondary}"
+                   Margin="4,12,0,4" />
 
-        <HorizontalStackLayout Spacing="10">
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   BorderColor="{StaticResource Gray200}"
+                   CornerRadius="12"
+                   Padding="16,12"
+                   HasShadow="False">
+                <Label x:Name="CardCountLabel"
+                       Text="0"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center" />
+            </Frame>
 
-            <Label x:Name="CardCountLabel"
-                   Text="0"
-                   FontSize="24"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Center"
-                   WidthRequest="60"
-                   HorizontalTextAlignment="Center" />
+            <!-- Save Button -->
+            <Button Text="Sauvegarder"
+                    Clicked="OnSaveClicked"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="14"
+                    HeightRequest="54"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Margin="0,24,0,0" />
 
-        </HorizontalStackLayout>
+            <!-- Cancel Button -->
+            <Button Text="Annuler"
+                    Clicked="OnCancelClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource TextSecondary}"
+                    BorderColor="{StaticResource Gray200}"
+                    BorderWidth="1"
+                    CornerRadius="14"
+                    HeightRequest="54"
+                    FontSize="16" />
 
-        <Button Text="Sauvegarder"
-               Clicked="OnSaveClicked"
-               BackgroundColor="#4CAF50"
-               TextColor="White"
-               Margin="0,30,0,0" />
-
-        <Button Text="Annuler"
-               Clicked="OnCancelClicked"
-               BackgroundColor="Gray"
-               TextColor="White" />
-
-    </StackLayout>
+        </StackLayout>
+    </ScrollView>
 
 </ContentPage>

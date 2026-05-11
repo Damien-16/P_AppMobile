@@ -121,6 +121,7 @@ namespace FlashCards
             CardTextLabel.Text = _isShowingFront ? card.Front : card.Back;
             SideLabel.Text = _isShowingFront ? "Recto" : "Verso";
             ProgressLabel.Text = $"Carte {_currentIndex + 1} / {CurrentDeck.Cards.Count}";
+            StudyProgressBar.Progress = (double)(_currentIndex + 1) / CurrentDeck.Cards.Count;
         }
 
         private async void OnFlipClicked(object sender, EventArgs e)

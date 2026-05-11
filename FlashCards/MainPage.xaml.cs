@@ -1,10 +1,15 @@
-﻿namespace FlashCards
+namespace FlashCards
 {
     public partial class MainPage : ContentPage
     {
         public MainPage()
         {
             InitializeComponent();
+        }
+
+        private void OnMenuClicked(object sender, EventArgs e)
+        {
+            Shell.Current.FlyoutIsPresented = true;
         }
 
         private async void OnManageDecksClicked(object sender, EventArgs e)

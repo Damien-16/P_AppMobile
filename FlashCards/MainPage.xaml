@@ -1,43 +1,70 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FlashCards.MainPage"
-             BackgroundColor="#F0F4F8">
+             BackgroundColor="{StaticResource PageBackground}"
+             Shell.NavBarIsVisible="False">
 
-    <VerticalStackLayout
-        Padding="30"
-        Spacing="30"
-        VerticalOptions="Center">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
 
-        <Label
-            Text="Bienvenu sur&#10;Ozzlet"
-            TextColor="#5E61E6"
-            FontSize="28"
-            FontAttributes="Bold"
-            HorizontalTextAlignment="Center"
-            Margin="0,0,0,40" />
+        <!-- Header Bar -->
+        <Grid Grid.Row="0"
+              BackgroundColor="{StaticResource CardBackground}"
+              Padding="20,16"
+              ColumnDefinitions="Auto,*">
+            <Label Grid.Column="0"
+                   Text="☰"
+                   FontSize="22"
+                   TextColor="{StaticResource TextPrimary}"
+                   VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuClicked" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="1"
+                   Text="Ozzlet"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource Primary}"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center" />
+        </Grid>
 
-        <Button
-            Text="Apprendre"
-            BackgroundColor="#5E61E6"
-            TextColor="White"
-            HeightRequest="60"
-            CornerRadius="15"
-            FontSize="20"
-            CharacterSpacing="1"
-            Clicked="OnLearnClicked" />
+        <!-- Main Content -->
+        <VerticalStackLayout Grid.Row="1"
+                             Padding="30,0"
+                             Spacing="20"
+                             VerticalOptions="Center">
 
-        <Button
-            Text="Gerer mes cartes"
-            BackgroundColor="Transparent"
-            TextColor="#5E61E6"
-            BorderColor="#5E61E6"
-            BorderWidth="1"
-            HeightRequest="60"
-            CornerRadius="15"
-            FontSize="20"
-            Clicked="OnManageDecksClicked" />
+            <Label Text="Bienvenu sur&#10;Ozzlet"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="30"
+                   FontFamily="OpenSansSemibold"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,30" />
 
-    </VerticalStackLayout>
+            <Button Text="Apprendre"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    HeightRequest="56"
+                    CornerRadius="14"
+                    FontSize="17"
+                    FontAttributes="Bold"
+                    Clicked="OnLearnClicked" />
+
+            <Button Text="Gérer mes cartes"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Primary}"
+                    BorderColor="{StaticResource Primary}"
+                    BorderWidth="1.5"
+                    HeightRequest="56"
+                    CornerRadius="14"
+                    FontSize="17"
+                    Clicked="OnManageDecksClicked" />
+
+        </VerticalStackLayout>
+
+    </Grid>
 
 </ContentPage>

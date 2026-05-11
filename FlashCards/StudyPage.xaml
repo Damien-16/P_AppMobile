@@ -2,119 +2,223 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FlashCards.StudyPage"
-             Title="Apprentissage">
+             Title="Apprentissage"
+             BackgroundColor="{StaticResource PageBackground}">
 
-    <Grid Padding="20" RowDefinitions="*,Auto,Auto">
-        
-        <!-- Card Display -->
-        <Frame Grid.Row="0" 
+    <Grid Padding="16" RowDefinitions="Auto,*,Auto,Auto">
+
+        <!-- Progress Bar Header -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="12"
+              Margin="0,0,0,16">
+            <Label Grid.Column="0"
+                   Text="Quitter"
+                   FontSize="14"
+                   TextColor="{StaticResource TextSecondary}"
+                   VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackToDecksClicked" />
+                </Label.GestureRecognizers>
+            </Label>
+            <ProgressBar Grid.Column="1"
+                         x:Name="StudyProgressBar"
+                         Progress="0"
+                         ProgressColor="{StaticResource Primary}"
+                         VerticalOptions="Center" />
+            <Label Grid.Column="2"
+                   x:Name="ProgressLabel"
+                   FontSize="14"
+                   TextColor="{StaticResource TextSecondary}"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <!-- Flashcard -->
+        <Frame Grid.Row="1"
                x:Name="CardFrame"
-               VerticalOptions="Center" 
-               HorizontalOptions="Fill" 
-               HeightRequest="300" 
-               CornerRadius="20" 
-               BackgroundColor="#F0F0F0">
+               VerticalOptions="Fill"
+               HorizontalOptions="Fill"
+               CornerRadius="20"
+               BackgroundColor="{StaticResource CardBackground}"
+               BorderColor="{StaticResource Gray200}"
+               HasShadow="False">
             <Frame.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFlipClicked" />
             </Frame.GestureRecognizers>
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                <Label x:Name="SideLabel" 
-                       Text="Recto" 
-                       FontSize="Caption" 
-                       TextColor="Gray" 
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="12">
+                <Label x:Name="SideLabel"
+                       Text="Recto"
+                       FontSize="12"
+                       TextColor="{StaticResource TextMuted}"
                        HorizontalOptions="Center" />
-                <Label x:Name="CardTextLabel" 
-                       Text="Question" 
-                       FontSize="32" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center" 
-                       VerticalOptions="Center" 
+                <Label x:Name="CardTextLabel"
+                       Text="Question"
+                       FontSize="30"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
                        HorizontalTextAlignment="Center" />
+                <Label Text="Appuyez pour retourner"
+                       FontSize="12"
+                       TextColor="{StaticResource TextMuted}"
+                       HorizontalOptions="Center"
+                       Margin="0,20,0,0" />
             </VerticalStackLayout>
         </Frame>
 
-        <Label Grid.Row="1" 
-               x:Name="ProgressLabel" 
-               Text="Carte 1 / 10" 
-               HorizontalOptions="Center" 
-               Margin="0,20" />
-
-        <Label Grid.Row="1"
+        <!-- Timer Row -->
+        <Label Grid.Row="2"
                x:Name="TimerLabel"
                Text="00:00"
                HorizontalOptions="End"
-               Margin="0,20,10,20"
-               TextColor="Gray" />
+               TextColor="{StaticResource TextMuted}"
+               FontSize="13"
+               Margin="0,10,4,0" />
 
-        <!-- Study Controls -->
-        <Grid Grid.Row="2" x:Name="StudyControls" ColumnDefinitions="*,*,*" ColumnSpacing="10">
-            <Button Grid.Column="0" Text="Faux (⬅️)" Clicked="OnIncorrectClicked" BackgroundColor="#F44336" TextColor="White" />
-            <Button Grid.Column="1" Text="Retourner" Clicked="OnFlipClicked" BackgroundColor="#2196F3" TextColor="White" />
-            <Button Grid.Column="2" Text="Juste (➡️)" Clicked="OnCorrectClicked" BackgroundColor="#4CAF50" TextColor="White" />
+        <!-- Action Buttons -->
+        <Grid Grid.Row="3"
+              x:Name="StudyControls"
+              ColumnDefinitions="*,*"
+              ColumnSpacing="12"
+              Margin="0,8,0,0">
+            <Button Grid.Column="0"
+                    Text="Faux"
+                    Clicked="OnIncorrectClicked"
+                    BackgroundColor="{StaticResource AccentRed}"
+                    TextColor="White"
+                    CornerRadius="14"
+                    HeightRequest="54"
+                    FontSize="16"
+                    FontAttributes="Bold" />
+            <Button Grid.Column="1"
+                    Text="Valider"
+                    Clicked="OnCorrectClicked"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="14"
+                    HeightRequest="54"
+                    FontSize="16"
+                    FontAttributes="Bold" />
         </Grid>
 
-        <!-- Stats View (Matching resultat.png) -->
-        <Grid Grid.Row="0" Grid.RowSpan="3" x:Name="StatsView" IsVisible="False" BackgroundColor="#4E5DED">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <!-- Stats View (Session Terminée) -->
+        <Grid Grid.Row="0" Grid.RowSpan="4"
+              x:Name="StatsView"
+              IsVisible="False"
+              BackgroundColor="{StaticResource Primary}"
+              RowDefinitions="*,Auto">
 
-            <VerticalStackLayout VerticalOptions="Center" Spacing="30" Padding="20">
+            <VerticalStackLayout Grid.Row="0"
+                                 VerticalOptions="Center"
+                                 Spacing="24"
+                                 Padding="20">
+
                 <!-- Icon and Title -->
-                <Label Text="📊" FontSize="60" HorizontalOptions="Center" TextColor="White" />
-                <Label Text="Session Terminée" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White" />
+                <Label Text="📊"
+                       FontSize="56"
+                       HorizontalOptions="Center"
+                       TextColor="White" />
+                <Label Text="Session Terminée"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="White" />
 
-                <!-- Top Row Stats -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-                    <Frame Grid.Column="0" BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15">
-                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                            <Label Text="⏱️" FontSize="24" HorizontalOptions="Center" />
-                            <Label x:Name="TimeLabel" Text="1 m 55s" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
-                            <Label Text="Temps passé" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                <!-- Stats Cards Row -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Frame Grid.Column="0"
+                           BackgroundColor="#5D6AE8"
+                           BorderColor="Transparent"
+                           CornerRadius="16"
+                           Padding="14">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="⏱️" FontSize="22" HorizontalOptions="Center" />
+                            <Label x:Name="TimeLabel"
+                                   Text="1 m 55s"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Temps passé"
+                                   FontSize="11"
+                                   TextColor="#C5CCFF"
+                                   HorizontalOptions="Center" />
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Column="1" BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15">
-                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                            <Label Text="✅" FontSize="24" HorizontalOptions="Center" />
-                            <Label x:Name="PercentageLabel" Text="33%" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
-                            <Label Text="Correcte" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                    <Frame Grid.Column="1"
+                           BackgroundColor="#5D6AE8"
+                           BorderColor="Transparent"
+                           CornerRadius="16"
+                           Padding="14">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="✅" FontSize="22" HorizontalOptions="Center" />
+                            <Label x:Name="PercentageLabel"
+                                   Text="33%"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Correcte"
+                                   FontSize="11"
+                                   TextColor="#C5CCFF"
+                                   HorizontalOptions="Center" />
                         </VerticalStackLayout>
                     </Frame>
                 </Grid>
 
-                <!-- Bottom Row (Difficult item - optional/placeholder) -->
-                <Frame BackgroundColor="#6475F2" BorderColor="Transparent" CornerRadius="15" Padding="15" WidthRequest="180" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                        <Label Text="❌" FontSize="24" HorizontalOptions="Center" />
-                        <Label x:Name="HardestCardLabel" Text="Card" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
-                        <Label Text="Le plus dure" FontSize="12" TextColor="#D1D5FF" HorizontalOptions="Center" />
+                <!-- Hardest Card -->
+                <Frame BackgroundColor="#5D6AE8"
+                       BorderColor="Transparent"
+                       CornerRadius="16"
+                       Padding="14"
+                       WidthRequest="200"
+                       HorizontalOptions="Center">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="❌" FontSize="22" HorizontalOptions="Center" />
+                        <Label x:Name="HardestCardLabel"
+                               Text="Card"
+                               FontSize="17"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               HorizontalOptions="Center" />
+                        <Label Text="Le plus dure"
+                               FontSize="11"
+                               TextColor="#C5CCFF"
+                               HorizontalOptions="Center" />
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
 
-            <!-- Bottom Buttons Container -->
-            <Frame Grid.Row="1" BackgroundColor="White" Padding="30" Margin="0" HasShadow="False" BorderColor="Transparent">
-                <VerticalStackLayout Spacing="15">
-                    <Button Text="🔄 Recommencer" 
-                            Clicked="OnRestartClicked" 
-                            BackgroundColor="#5E69EE" 
-                            TextColor="White" 
-                            HeightRequest="60" 
-                            CornerRadius="15" 
-                            FontSize="18" 
+            <!-- Bottom Action Buttons -->
+            <Frame Grid.Row="1"
+                   BackgroundColor="{StaticResource CardBackground}"
+                   Padding="20,24"
+                   Margin="0"
+                   HasShadow="False"
+                   BorderColor="Transparent"
+                   CornerRadius="0">
+                <VerticalStackLayout Spacing="12">
+                    <Button Text="🔄 Recommencer"
+                            Clicked="OnRestartClicked"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            HeightRequest="56"
+                            CornerRadius="14"
+                            FontSize="17"
                             FontAttributes="Bold" />
-                    <Button Text="Retour au menu" 
-                            Clicked="OnBackToDecksClicked" 
-                            BackgroundColor="#F1F4F8" 
-                            TextColor="Black" 
-                            HeightRequest="60" 
-                            CornerRadius="15" 
-                            FontSize="18" />
+                    <Button Text="Retour au menu"
+                            Clicked="OnBackToDecksClicked"
+                            BackgroundColor="{StaticResource Gray100}"
+                            TextColor="{StaticResource TextPrimary}"
+                            HeightRequest="56"
+                            CornerRadius="14"
+                            FontSize="17" />
                 </VerticalStackLayout>
             </Frame>
         </Grid>
 
     </Grid>
+
 </ContentPage>
