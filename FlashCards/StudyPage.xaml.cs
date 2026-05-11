@@ -85,6 +85,7 @@ namespace FlashCards
                 TimerLabel.IsVisible = true;
                 CardFrame.IsVisible = true;
                 
+                CardFrame.RotationX = 0;
                 CardFrame.RotationY = 0;
                 CardFrame.TranslationX = 0;
                 CardFrame.Opacity = 1;
@@ -122,10 +123,16 @@ namespace FlashCards
             ProgressLabel.Text = $"Carte {_currentIndex + 1} / {CurrentDeck.Cards.Count}";
         }
 
-        private void OnFlipClicked(object sender, EventArgs e)
+        private async void OnFlipClicked(object sender, EventArgs e)
         {
+            // Phase 1 : rétrécir horizontalement (illusion de rotation)
+            await CardFrame.ScaleXTo(0, 150, Easing.CubicIn);
+
             _isShowingFront = !_isShowingFront;
             ShowCard();
+
+            // Phase 2 : agrandir depuis 0 (verso révélé)
+            await CardFrame.ScaleXTo(1, 150, Easing.CubicOut);
         }
 
         private void OnCorrectClicked(object sender, EventArgs e)
