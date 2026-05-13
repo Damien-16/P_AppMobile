@@ -9,19 +9,19 @@
     <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
         
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,20">
+        <Grid Grid.Row="0" ColumnDefinitions="40, *, 40" Margin="0,0,0,20" VerticalOptions="Center">
             <!-- Hamburger menu -->
-            <Label Grid.Column="0" Text="&#x2630;" FontSize="32" TextColor="Black" VerticalOptions="Center">
+            <Label Grid.Column="0" Text="&#x2630;" FontSize="28" TextColor="#512BD4" VerticalOptions="Center" HorizontalOptions="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnMenuTapped" />
                 </Label.GestureRecognizers>
             </Label>
             
-            <Label Grid.Column="1" Text="{Binding SelectedBook.Title, TargetNullValue='Le livre'}" 
-                   FontSize="24" TextColor="Black" HorizontalOptions="Center" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="{Binding SelectedBook.Title, TargetNullValue='Lecture'}" 
+                   FontSize="20" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" LineBreakMode="TailTruncation" />
                    
             <!-- Back chevron -->
-            <Label Grid.Column="2" Text="&lt;" FontSize="32" TextColor="Black" VerticalOptions="Center">
+            <Label Grid.Column="2" Text="✕" FontSize="24" TextColor="Gray" VerticalOptions="Center" HorizontalOptions="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnBackTapped" />
                 </Label.GestureRecognizers>

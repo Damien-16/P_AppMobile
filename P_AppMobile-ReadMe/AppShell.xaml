@@ -9,6 +9,15 @@
     Shell.BackgroundColor="White"
     Shell.TitleColor="Black">
 
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#512BD4" HeightRequest="150" Padding="20">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="5">
+                <Label Text="ReadMe" FontSize="28" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Votre bibliothèque de poche" FontSize="14" TextColor="#D3D3D3" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
     <Shell.ToolbarItems>
         <ToolbarItem 
             Text="Rechercher"
@@ -16,11 +25,11 @@
             Order="Primary" />
     </Shell.ToolbarItems>
 
-    <FlyoutItem Title="Accueil">
+    <FlyoutItem Title="Accueil" FlyoutIcon="home.png">
         <ShellContent
-            Title="ReadMe"
+            Title="Bibliothèque"
             ContentTemplate="{DataTemplate local:MainPage}"
-            Route="MainPage" />
+            Route="main" />
     </FlyoutItem>
 
 </Shell>
