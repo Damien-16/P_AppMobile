@@ -1,4 +1,5 @@
 using P_AppMobile_ReadMe.Models;
+using P_AppMobile_ReadMe.Services;
 using VersOne.Epub;
 using System.Text.RegularExpressions;
 
@@ -7,6 +8,7 @@ namespace P_AppMobile_ReadMe;
 [QueryProperty(nameof(SelectedBook), "SelectedBook")]
 public partial class DetailPage : ContentPage
 {
+    private readonly BookService _bookService = new BookService();
     private Book _selectedBook;
     public Book SelectedBook
     {
@@ -119,13 +121,14 @@ public partial class DetailPage : ContentPage
         {
             _pages.Add(currentPageText.Trim());
         }
-
         if (_pages.Count == 0)
         {
             _pages.Add("");
         }
 
-        _currentPageIndex = 0;
+        // Reprise automatique : on récupère l'index sauvegardé
+        _currentPageIndex = SelectedBook.LastPageRead;
+
         UpdatePageDisplay();
     }
 
@@ -137,6 +140,24 @@ public partial class DetailPage : ContentPage
         PageIndicator = $"{_currentPageIndex + 1}/{_pages.Count}";
         ProgressValue = _pages.Count > 1 ? (double)_currentPageIndex / (_pages.Count - 1) : 1.0;
         IsCoverVisible = _currentPageIndex == 0;
+
+        // Mémorisation de la page actuelle
+            SelectedBook.LastPageRead = _currentPageIndex;
+            SaveProgress();
+        
+    }
+
+    private async void SaveProgress()
+    {
+        // On charge la liste complète pour mettre à jour le bon livre et sauvegarder le tout
+        var books = await _bookService.LoadBooksAsync();
+        var bookToUpdate = books.FirstOrDefault(b => b.Id == SelectedBook.Id);
+        
+        if (bookToUpdate != null)
+        {
+            bookToUpdate.LastPageRead = _currentPageIndex;
+            await _bookService.SaveBooksAsync(books);
+        }
     }
 
     private void OnPreviousClicked(object sender, EventArgs e)
