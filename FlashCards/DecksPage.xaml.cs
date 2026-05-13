@@ -33,7 +33,7 @@ namespace FlashCards
             }
 
             ApplyFilter();
-            UpdateInfo($"Charg�: {_decks.Count} deck(s)");
+            UpdateInfo($"Chargé: {_decks.Count} deck(s)");
         }
 
         private void ApplyFilter()
