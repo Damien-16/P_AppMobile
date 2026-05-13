@@ -113,8 +113,8 @@ namespace FlashCards
             await _dataService.SaveDecksAsync(_decks);
 
             NewDeckEntry.Text = string.Empty;
-            ApplyFilter(); // Rafra�chir l'affichage
-            UpdateInfo($"Ajout�: {name}");
+            ApplyFilter(); // Rafréchir l'affichage
+            UpdateInfo($"Ajouté: {name}");
         }
 
         private async void OnDeckTapped(object sender, EventArgs e)
@@ -196,8 +196,8 @@ namespace FlashCards
 
             _decks.Remove(deck);
             await _dataService.SaveDecksAsync(_decks);
-            ApplyFilter(); // Rafra�chir l'affichage
-            UpdateInfo($"Supprim�: {deck.Name}");
+            ApplyFilter(); // Rafrechir l'affichage
+            UpdateInfo($"Supprimé: {deck.Name}");
         }
     }
 }

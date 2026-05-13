@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace FlashCards
 {
-    // On re�oit le deck et la liste globale pour pouvoir sauvegarder
+    // On reçoit le deck et la liste globale pour pouvoir sauvegarder
     [QueryProperty(nameof(CurrentDeck), "deck")]
     [QueryProperty(nameof(AllDecks), "decks")]
     public partial class CardsPage : ContentPage

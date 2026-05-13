@@ -53,7 +53,7 @@
                     FontAttributes="Bold"
                     Clicked="OnLearnClicked" />
 
-            <Button Text="Gérer mes cartes"
+            <Button Text="Gérer mes decks"
                     BackgroundColor="Transparent"
                     TextColor="{StaticResource Primary}"
                     BorderColor="{StaticResource Primary}"
