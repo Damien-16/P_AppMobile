@@ -1,14 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="P_AppMobile_ReadMe.MainPage"
              BackgroundColor="White">
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <VerticalStackLayout Grid.Row="0" Padding="20,15,20,5" Spacing="5">
-            <Label Text="Tous les livres" FontSize="22" FontAttributes="Bold" TextColor="Black" />
-            <BoxView HeightRequest="1" Color="#D3D3D3" HorizontalOptions="Fill" />
-        </VerticalStackLayout>
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="20,15,20,5">
+            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                <Label Text="Tous les livres" FontSize="22" FontAttributes="Bold" TextColor="Black" />
+                <BoxView HeightRequest="1" Color="#D3D3D3" HorizontalOptions="Fill" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" 
+                    Text="⇅ Date" 
+                    Clicked="OnSortClicked" 
+                    BackgroundColor="Transparent" 
+                    TextColor="#512BD4" 
+                    FontSize="14"
+                    VerticalOptions="Center" />
+        </Grid>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Books}" SelectionMode="None">
             <CollectionView.ItemTemplate>

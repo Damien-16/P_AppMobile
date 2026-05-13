@@ -14,6 +14,7 @@ namespace P_AppMobile_ReadMe
         // Déclaration du service et de la liste pour l'UI
         private readonly BookService _bookService;
         public ObservableCollection<Book> Books { get; set; } = new ObservableCollection<Book>();
+        private bool _isAscending = false; // Par défaut, les plus récents en premier
 
         public MainPage()
         {
@@ -33,6 +34,29 @@ namespace P_AppMobile_ReadMe
         {
             var savedBooks = await _bookService.LoadBooksAsync();
             foreach (var book in savedBooks)
+            {
+                Books.Add(book);
+            }
+            ApplySort();
+        }
+
+        private void OnSortClicked(object sender, EventArgs e)
+        {
+            _isAscending = !_isAscending;
+            ApplySort();
+        }
+
+        private void ApplySort()
+        {
+            if (Books.Count <= 1) return;
+
+            var sortedList = _isAscending
+                ? Books.OrderBy(b => b.DateAdded).ToList()
+                : Books.OrderByDescending(b => b.DateAdded).ToList();
+
+            // Vider et re-remplir pour notifier l'UI
+            Books.Clear();
+            foreach (var book in sortedList)
             {
                 Books.Add(book);
             }
@@ -97,6 +121,7 @@ namespace P_AppMobile_ReadMe
                     };
 
                     Books.Add(newBook);
+                    ApplySort(); // Maintenir le tri après ajout
 
                     // Sauvegarde persistante (nécessite System.Linq pour .ToList())
                     await _bookService.SaveBooksAsync(Books.ToList());
