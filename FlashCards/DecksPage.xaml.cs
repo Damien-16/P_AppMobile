@@ -4,8 +4,29 @@ using System.Collections.ObjectModel;
 
 namespace FlashCards
 {
+    [QueryProperty(nameof(Mode), "mode")]
     public partial class DecksPage : ContentPage
     {
+        public static readonly BindableProperty IsManageModeProperty =
+            BindableProperty.Create(nameof(IsManageMode), typeof(bool), typeof(DecksPage), true);
+
+        public bool IsManageMode
+        {
+            get => (bool)GetValue(IsManageModeProperty);
+            set => SetValue(IsManageModeProperty, value);
+        }
+
+        private string _mode;
+        public string Mode
+        {
+            get => _mode;
+            set
+            {
+                _mode = value;
+                IsManageMode = _mode != "study";
+                UpdateUIForMode();
+            }
+        }
         private JsonDataService _dataService;
         private List<Deck> _decks;
         private List<Deck> _filteredDecks;
@@ -65,6 +86,12 @@ namespace FlashCards
             InfoLabel.Text = $"{DateTime.Now:HH:mm:ss} - {message}";
         }
 
+        private void UpdateUIForMode()
+        {
+            AddDeckFrame.IsVisible = IsManageMode;
+            Title = IsManageMode ? "Mes Decks" : "Choisir un deck à apprendre";
+        }
+
         private async void OnAddDeckClicked(object sender, EventArgs e)
         {
             string name = NewDeckEntry.Text?.Trim();
@@ -97,8 +124,21 @@ namespace FlashCards
 
             if (deck == null) return;
 
-            // ATTENTION : Si CardsPage attend une ObservableCollection, 
-            // il faut la crer ici, sinon la navigation va crasher !
+            if (!IsManageMode)
+            {
+                // Mode apprentissage : aller direct au StudyPage
+                if (deck.Cards.Count == 0)
+                {
+                    await DisplayAlert("Info", "Ce deck n'a pas de cartes !", "OK");
+                    return;
+                }
+
+                var navParam = new Dictionary<string, object> { { "deck", deck } };
+                await Shell.Current.GoToAsync("StudyPage", navParam);
+                return;
+            }
+
+            // Mode gestion : aller aux cartes
             var parameters = new Dictionary<string, object>
             {
                 { "deck", deck },

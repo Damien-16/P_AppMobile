@@ -52,7 +52,7 @@
                        TextColor="{StaticResource TextMuted}"
                        HorizontalOptions="Center" />
                 <Label x:Name="CardTextLabel"
-                       Text="Question"
+                      
                        FontSize="30"
                        FontAttributes="Bold"
                        TextColor="{StaticResource TextPrimary}"

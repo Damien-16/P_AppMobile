@@ -14,14 +14,14 @@ namespace FlashCards
 
         private async void OnManageDecksClicked(object sender, EventArgs e)
         {
-            // Navigation vers la page des decks
-            await Shell.Current.GoToAsync("//DecksPage");
+            // Navigation vers la page des decks en mode gestion
+            await Shell.Current.GoToAsync("//DecksPage?mode=manage");
         }
 
         private async void OnLearnClicked(object sender, EventArgs e)
         {
-            // Navigation vers DecksPage aussi pour choisir quoi apprendre
-            await Shell.Current.GoToAsync("//DecksPage");
+            // Navigation vers DecksPage en mode apprentissage
+            await Shell.Current.GoToAsync("//DecksPage?mode=study");
         }
     }
 }
