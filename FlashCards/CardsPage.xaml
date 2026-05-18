@@ -25,7 +25,8 @@
                        Placeholder="Écrivez ici"
                        PlaceholderColor="{StaticResource TextMuted}"
                        TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent" />
+                       BackgroundColor="Transparent"
+                       MaxLength="255" />
             </Frame>
 
             <!-- Verso Entry -->
@@ -43,7 +44,8 @@
                        Placeholder="Écrivez ici"
                        PlaceholderColor="{StaticResource TextMuted}"
                        TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent" />
+                       BackgroundColor="Transparent"
+                       MaxLength="255" />
             </Frame>
 
             <!-- Save Button -->
