@@ -12,6 +12,7 @@ namespace FlashCards
         public Deck CurrentDeck { get; set; }
         public ObservableCollection<Deck> AllDecks { get; set; }
         private JsonDataService _dataService = new JsonDataService();
+        private Card _editingCard;
 
         public CardsPage()
         {
@@ -33,16 +34,43 @@ namespace FlashCards
                 return;
             }
 
-            var newCard = new Card { Front = FrontEntry.Text, Back = BackEntry.Text };
-            CurrentDeck.Cards.Add(newCard);
-
-            // On notifie que le nombre de cartes a chang pour l'cran prcdent
-            CurrentDeck.RefreshCardCount();
+            if (_editingCard == null)
+            {
+                // Ajout
+                var newCard = new Card { Front = FrontEntry.Text, Back = BackEntry.Text };
+                CurrentDeck.Cards.Add(newCard);
+                CurrentDeck.RefreshCardCount();
+            }
+            else
+            {
+                // Modification
+                _editingCard.Front = FrontEntry.Text;
+                _editingCard.Back = BackEntry.Text;
+                
+                // Forcer le rafraîchissement de la liste
+                var index = CurrentDeck.Cards.IndexOf(_editingCard);
+                CurrentDeck.Cards[index] = _editingCard;
+                
+                _editingCard = null;
+                SaveButton.Text = "Enregistrer";
+            }
 
             await SaveData();
 
             FrontEntry.Text = string.Empty;
             BackEntry.Text = string.Empty;
+        }
+
+        private void OnEditCardClicked(object sender, EventArgs e)
+        {
+            _editingCard = (sender as Button)?.CommandParameter as Card;
+            if (_editingCard != null)
+            {
+                FrontEntry.Text = _editingCard.Front;
+                BackEntry.Text = _editingCard.Back;
+                SaveButton.Text = "Mettre à jour";
+                FrontEntry.Focus();
+            }
         }
 
         private async void OnStudyClicked(object sender, EventArgs e)

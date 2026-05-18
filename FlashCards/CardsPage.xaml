@@ -49,7 +49,8 @@
             </Frame>
 
             <!-- Save Button -->
-            <Button Text="Enregistrer"
+            <Button x:Name="SaveButton"
+                    Text="Enregistrer"
                     Clicked="OnAddCardClicked"
                     BackgroundColor="{StaticResource Primary}"
                     TextColor="White"
@@ -71,7 +72,7 @@
                            BorderColor="{StaticResource Gray200}"
                            CornerRadius="12"
                            HasShadow="False">
-                        <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="*,*,Auto,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0"
                                    Text="{Binding Front}"
                                    VerticalOptions="Center"
@@ -84,6 +85,15 @@
                                    FontSize="14"
                                    TextColor="{StaticResource TextSecondary}" />
                             <Button Grid.Column="2"
+                                    Text="✏️"
+                                    Clicked="OnEditCardClicked"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource TextSecondary}"
+                                    Padding="4"
+                                    HeightRequest="40"
+                                    WidthRequest="44" />
+                            <Button Grid.Column="3"
                                     Text="🗑️"
                                     Clicked="OnDeleteCardClicked"
                                     CommandParameter="{Binding .}"
