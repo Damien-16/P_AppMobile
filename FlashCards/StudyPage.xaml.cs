@@ -74,6 +74,13 @@ namespace FlashCards
         {
             if (CurrentDeck != null && CurrentDeck.Cards.Count > 0)
             {
+                // Mélanger les cartes
+                var rnd = new Random();
+                var shuffled = CurrentDeck.Cards.OrderBy(x => rnd.Next()).ToList();
+                CurrentDeck.Cards.Clear();
+                foreach (var card in shuffled)
+                    CurrentDeck.Cards.Add(card);
+
                 _currentIndex = 0;
                 _correctCount = 0;
                 _isShowingFront = true;
