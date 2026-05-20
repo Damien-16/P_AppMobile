@@ -200,7 +200,7 @@
                    BorderColor="Transparent"
                    CornerRadius="0">
                 <VerticalStackLayout Spacing="12">
-                    <Button Text="🔄 Recommencer"
+                    <Button Text="Recommencer"
                             Clicked="OnRestartClicked"
                             BackgroundColor="{StaticResource Primary}"
                             TextColor="White"
