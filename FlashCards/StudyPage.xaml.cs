@@ -18,6 +18,7 @@ namespace FlashCards
             }
         }
 
+        private List<Card> _sessionCards = new List<Card>();
         private int _currentIndex = 0;
         private bool _isShowingFront = true;
         private int _correctCount = 0;
@@ -74,12 +75,9 @@ namespace FlashCards
         {
             if (CurrentDeck != null && CurrentDeck.Cards.Count > 0)
             {
-                // Mélanger les cartes
+                // Mélanger les cartes dans une liste de session
                 var rnd = new Random();
-                var shuffled = CurrentDeck.Cards.OrderBy(x => rnd.Next()).ToList();
-                CurrentDeck.Cards.Clear();
-                foreach (var card in shuffled)
-                    CurrentDeck.Cards.Add(card);
+                _sessionCards = CurrentDeck.Cards.OrderBy(x => rnd.Next()).ToList();
 
                 _currentIndex = 0;
                 _correctCount = 0;
@@ -122,13 +120,13 @@ namespace FlashCards
 
         private void ShowCard()
         {
-            if (CurrentDeck == null || CurrentDeck.Cards.Count == 0) return;
+            if (_sessionCards == null || _sessionCards.Count == 0) return;
 
-            var card = CurrentDeck.Cards[_currentIndex];
+            var card = _sessionCards[_currentIndex];
             CardTextLabel.Text = _isShowingFront ? card.Front : card.Back;
             SideLabel.Text = _isShowingFront ? "Recto" : "Verso";
-            ProgressLabel.Text = $"Carte {_currentIndex + 1} / {CurrentDeck.Cards.Count}";
-            StudyProgressBar.Progress = (double)(_currentIndex + 1) / CurrentDeck.Cards.Count;
+            ProgressLabel.Text = $"Carte {_currentIndex + 1} / {_sessionCards.Count}";
+            StudyProgressBar.Progress = (double)(_currentIndex + 1) / _sessionCards.Count;
         }
 
         private async void OnFlipClicked(object sender, EventArgs e)
@@ -145,13 +143,18 @@ namespace FlashCards
 
         private void OnCorrectClicked(object sender, EventArgs e)
         {
-            _correctCount++;
+            var card = _sessionCards[_currentIndex];
+            // Uniquement compter comme correct si jamais raté auparavant dans cette session
+            if (!_missedCount.ContainsKey(card.Id))
+            {
+                _correctCount++;
+            }
             MoveToNext(true);
         }
 
         private void OnIncorrectClicked(object sender, EventArgs e)
         {
-            var card = CurrentDeck.Cards[_currentIndex];
+            var card = _sessionCards[_currentIndex];
             if (!_missedCount.ContainsKey(card.Id))
                 _missedCount[card.Id] = 0;
             _missedCount[card.Id]++;
@@ -168,9 +171,21 @@ namespace FlashCards
                 CardFrame.FadeTo(0, 250)
             );
 
-            if (_currentIndex < CurrentDeck.Cards.Count - 1)
+            if (!isCorrect)
+            {
+                // Déplacer la carte ratée à la fin de la file
+                var card = _sessionCards[_currentIndex];
+                _sessionCards.RemoveAt(_currentIndex);
+                _sessionCards.Add(card);
+                // On n'incrémente pas _currentIndex, donc on verra la carte suivante
+            }
+            else
             {
                 _currentIndex++;
+            }
+
+            if (_currentIndex < _sessionCards.Count)
+            {
                 _isShowingFront = true;
                 ShowCard();
 
@@ -206,14 +221,14 @@ namespace FlashCards
                 
             TimeLabel.Text = timeStr;
             
-            double percentage = (double)_correctCount / CurrentDeck.Cards.Count * 100;
+            double percentage = (double)_correctCount / _sessionCards.Count * 100;
             PercentageLabel.Text = $"{Math.Round(percentage)}%";
 
             // Find hardest card
             if (_missedCount.Any())
             {
                 var hardestId = _missedCount.OrderByDescending(x => x.Value).First().Key;
-                var hardestCard = CurrentDeck.Cards.FirstOrDefault(c => c.Id == hardestId);
+                var hardestCard = _sessionCards.FirstOrDefault(c => c.Id == hardestId);
                 HardestCardLabel.Text = hardestCard?.Front ?? "---";
             }
             else
