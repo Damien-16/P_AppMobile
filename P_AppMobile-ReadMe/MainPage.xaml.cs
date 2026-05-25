@@ -32,12 +32,47 @@ namespace P_AppMobile_ReadMe
 
         private async void LoadSavedBooks()
         {
-            var savedBooks = await _bookService.LoadBooksAsync();
-            foreach (var book in savedBooks)
+            try
             {
-                Books.Add(book);
+                var savedBooks = await _bookService.LoadBooksAsync();
+                foreach (var book in savedBooks)
+                {
+                    Books.Add(book);
+                }
+                ApplySort();
+
+                // Téléchargement et extraction en arrière-plan des couvertures/fichiers manquants
+                _ = Task.Run(async () =>
+                {
+                    foreach (var book in savedBooks.ToList())
+                    {
+                        if (string.IsNullOrEmpty(book.CoverImagePath) || !File.Exists(book.CoverImagePath))
+                        {
+                            try
+                            {
+                                await _bookService.EnsureBookFileCachedAsync(book);
+                                // Mettre à jour l'UI sur le thread principal
+                                MainThread.BeginInvokeOnMainThread(() =>
+                                {
+                                    var index = Books.IndexOf(book);
+                                    if (index >= 0)
+                                    {
+                                        Books[index] = book;
+                                    }
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error caching cover in background: {ex.Message}");
+                            }
+                        }
+                    }
+                });
             }
-            ApplySort();
+            catch (Exception ex)
+            {
+                await DisplayAlert("Erreur", $"Échec du chargement : {ex.Message}", "OK");
+            }
         }
 
         private void OnSortClicked(object sender, EventArgs e)
@@ -83,48 +118,11 @@ namespace P_AppMobile_ReadMe
 
                 if (result != null)
                 {
-                    // 3. Extraction des métadonnées avec VersOne.Epub
-                    // On ouvre le flux une seule fois pour l'analyse
-                    using var stream = await result.OpenReadAsync();
-                    var epubBook = await EpubReader.ReadBookAsync(stream);
-                    string title = epubBook.Title ?? result.FileName;
-
-                    // 4. Copie locale du fichier dans le dossier de l'application
-                    // On utilise FileSystem.AppDataDirectory comme dans le JsonDataService
-                    string localFolder = FileSystem.AppDataDirectory;
-                    string targetPath = Path.Combine(localFolder, result.FileName);
-
-                    // Copie physique du fichier pour qu'il reste accessible plus tard
-                    using (var sourceStream = await result.OpenReadAsync())
-                    using (var targetStream = File.Create(targetPath))
-                    {
-                        await sourceStream.CopyToAsync(targetStream);
-                    }
-
-                    // 5. Extraction et sauvegarde de l'image de couverture
-                    string coverImagePath = string.Empty;
-                    if (epubBook.CoverImage != null)
-                    {
-                        string coverFileName = Path.GetFileNameWithoutExtension(result.FileName) + "_cover.jpg";
-                        coverImagePath = Path.Combine(localFolder, coverFileName);
-                        await File.WriteAllBytesAsync(coverImagePath, epubBook.CoverImage);
-                    }
-
-                    // 6. Création de l'objet et mise à jour de la liste
-                    var newBook = new Book
-                    {
-                        Title = title,
-                        FileName = result.FileName,
-                        FilePath = targetPath,
-                        CoverImagePath = coverImagePath,
-                        DateAdded = DateTime.Now
-                    };
+                    // Uploader via l'API (ceci copie également localement et extrait la couverture)
+                    var newBook = await _bookService.UploadBookAsync(result);
 
                     Books.Add(newBook);
                     ApplySort(); // Maintenir le tri après ajout
-
-                    // Sauvegarde persistante (nécessite System.Linq pour .ToList())
-                    await _bookService.SaveBooksAsync(Books.ToList());
                 }
             }
             catch (Exception ex)
@@ -141,16 +139,31 @@ namespace P_AppMobile_ReadMe
 
             if (selectedBook != null)
             {
+                try
+                {
+                    // Télécharger le fichier ePub s'il n'est pas déjà dans le cache local
+                    if (string.IsNullOrEmpty(selectedBook.FilePath) || !File.Exists(selectedBook.FilePath))
+                    {
+                        await _bookService.EnsureBookFileCachedAsync(selectedBook);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Erreur de téléchargement", $"Impossible de télécharger le livre : {ex.Message}", "OK");
+                    return;
+                }
+
                 // 2. Préparer le paramètre de navigation
                 var navigationParameter = new Dictionary<string, object>
-        {
-            { "SelectedBook", selectedBook }
-        };
+                {
+                    { "SelectedBook", selectedBook }
+                };
 
                 // 3. Naviguer vers la page de détails avec l'objet Book
                 await Shell.Current.GoToAsync("DetailsPage", navigationParameter);
             }
         }
+
         private async void OnDeleteBookClicked(object sender, EventArgs e)
         {
             // 1. Récupérer le bouton qui a été cliqué
@@ -166,12 +179,18 @@ namespace P_AppMobile_ReadMe
 
             if (confirm)
             {
+                try
+                {
+                    // 4. Supprimer du serveur (et nettoyer localement)
+                    await _bookService.DeleteBookAsync(bookToDelete.Id);
 
-                // 4. Retirer de la liste affichée
-                Books.Remove(bookToDelete);
-
-                // 5. Sauvegarder la nouvelle liste dans le fichier JSON
-                await _bookService.SaveBooksAsync(Books.ToList());
+                    // 5. Retirer de la liste affichée
+                    Books.Remove(bookToDelete);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Erreur", $"Impossible de supprimer le livre du serveur : {ex.Message}", "OK");
+                }
             }
         }
     }

@@ -15,6 +15,7 @@ namespace P_AppMobile_ReadMe.Models
         public string CoverImagePath { get; set; } = string.Empty;
         public DateTime DateAdded { get; set; } = DateTime.Now;
         public int LastPageRead { get; set; } = 0;
+        public List<string> Tags { get; set; } = new List<string>();
 
         public string DisplayDate => $"Ajouté le: {DateAdded:dd.MM.yyyy}";
     }
