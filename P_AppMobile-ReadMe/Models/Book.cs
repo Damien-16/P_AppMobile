@@ -17,6 +17,9 @@ namespace P_AppMobile_ReadMe.Models
         public int LastPageRead { get; set; } = 0;
         public List<string> Tags { get; set; } = new List<string>();
 
+        public string TagsText => Tags != null && Tags.Any() ? string.Join(", ", Tags) : string.Empty;
+        public bool HasTags => Tags != null && Tags.Any();
+
         public string DisplayDate => $"Ajouté le: {DateAdded:dd.MM.yyyy}";
     }
 }

@@ -183,9 +183,156 @@ public partial class DetailPage : ContentPage
         await Shell.Current.GoToAsync("..");
     }
 
-    private void OnMenuTapped(object sender, TappedEventArgs e)
+    private bool _isTagsPanelVisible;
+    public bool IsTagsPanelVisible
     {
-        Shell.Current.FlyoutIsPresented = !Shell.Current.FlyoutIsPresented;
+        get => _isTagsPanelVisible;
+        set { _isTagsPanelVisible = value; OnPropertyChanged(); }
+    }
+
+    private void OnTagsButtonClicked(object sender, TappedEventArgs e)
+    {
+        IsTagsPanelVisible = true;
+        PopulateBookTags();
+    }
+
+    private void OnCloseTagsPanelClicked(object sender, EventArgs e)
+    {
+        IsTagsPanelVisible = false;
+    }
+
+    private async void OnAddTagClicked(object sender, EventArgs e)
+    {
+        var newTag = NewTagEntry.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(newTag)) return;
+
+        if (SelectedBook != null)
+        {
+            await _bookService.AddTagToBookAsync(SelectedBook.Id, newTag);
+            if (SelectedBook.Tags == null)
+            {
+                SelectedBook.Tags = new List<string>();
+            }
+            if (!SelectedBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+            {
+                SelectedBook.Tags.Add(newTag);
+            }
+            NewTagEntry.Text = string.Empty;
+            PopulateBookTags();
+        }
+    }
+
+    private async void PopulateBookTags()
+    {
+        BookTagsFlexLayout.Children.Clear();
+        AllTagsFlexLayout.Children.Clear();
+        
+        if (SelectedBook == null) return;
+
+        // 1. Populate current book's tags
+        if (SelectedBook.Tags != null)
+        {
+            foreach (var tag in SelectedBook.Tags.ToList())
+            {
+                var border = new Border
+                {
+                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = new CornerRadius(12) },
+                    Stroke = Brush.Transparent,
+                    BackgroundColor = Color.FromArgb("#F0EEFF"),
+                    Padding = new Thickness(10, 5),
+                    Margin = new Thickness(4),
+                    HorizontalOptions = LayoutOptions.Start
+                };
+
+                var layout = new HorizontalStackLayout { Spacing = 5 };
+                
+                var label = new Label 
+                { 
+                    Text = tag, 
+                    TextColor = Color.FromArgb("#512BD4"), 
+                    FontSize = 13,
+                    VerticalOptions = LayoutOptions.Center 
+                };
+                
+                var deleteBtn = new Label 
+                { 
+                    Text = "✕", 
+                    TextColor = Colors.Red, 
+                    FontSize = 13, 
+                    FontAttributes = FontAttributes.Bold,
+                    VerticalOptions = LayoutOptions.Center,
+                    Margin = new Thickness(3, 0, 0, 0)
+                };
+
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += async (s, e) =>
+                {
+                    await _bookService.RemoveTagFromBookAsync(SelectedBook.Id, tag);
+                    SelectedBook.Tags.Remove(tag);
+                    PopulateBookTags();
+                };
+                deleteBtn.GestureRecognizers.Add(tapGesture);
+
+                layout.Children.Add(label);
+                layout.Children.Add(deleteBtn);
+                border.Content = layout;
+
+                BookTagsFlexLayout.Children.Add(border);
+            }
+        }
+
+        // 2. Populate all other available tags in the library
+        try
+        {
+            var allTags = await _bookService.GetAllTagsAsync();
+            var currentBookTags = SelectedBook.Tags ?? new List<string>();
+            var otherTags = allTags.Where(t => !currentBookTags.Contains(t, StringComparer.OrdinalIgnoreCase)).ToList();
+
+            foreach (var tag in otherTags)
+            {
+                var border = new Border
+                {
+                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = new CornerRadius(12) },
+                    Stroke = Color.FromArgb("#512BD4"),
+                    StrokeThickness = 1,
+                    BackgroundColor = Colors.White,
+                    Padding = new Thickness(10, 5),
+                    Margin = new Thickness(4),
+                    HorizontalOptions = LayoutOptions.Start
+                };
+
+                var label = new Label 
+                { 
+                    Text = tag, 
+                    TextColor = Color.FromArgb("#512BD4"), 
+                    FontSize = 13,
+                    VerticalOptions = LayoutOptions.Center 
+                };
+
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += async (s, e) =>
+                {
+                    await _bookService.AddTagToBookAsync(SelectedBook.Id, tag);
+                    if (SelectedBook.Tags == null)
+                    {
+                        SelectedBook.Tags = new List<string>();
+                    }
+                    if (!SelectedBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                    {
+                        SelectedBook.Tags.Add(tag);
+                    }
+                    PopulateBookTags();
+                };
+                border.GestureRecognizers.Add(tapGesture);
+                border.Content = label;
+
+                AllTagsFlexLayout.Children.Add(border);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading all tags: {ex.Message}");
+        }
     }
 
     private string CleanHtml(string html)

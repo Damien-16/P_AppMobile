@@ -11,22 +11,29 @@ namespace P_AppMobile_ReadMe
 {
     public partial class MainPage : ContentPage
     {
-        // Déclaration du service et de la liste pour l'UI
+        // Déclaration du service et des listes pour l'UI
         private readonly BookService _bookService;
         public ObservableCollection<Book> Books { get; set; } = new ObservableCollection<Book>();
+        public ObservableCollection<string> FilterTags { get; set; } = new ObservableCollection<string>();
+        
+        private List<Book> _allBooks = new List<Book>();
+        private string _selectedTag = "Tous";
         private bool _isAscending = false; // Par défaut, les plus récents en premier
 
         public MainPage()
         {
             InitializeComponent();
 
-            // Initialisation du service (basé sur la logique du projet FlashCards)
+            // Initialisation du service
             _bookService = new BookService();
 
-            // Indispensable pour que le XAML puisse voir la liste "Books"
+            // Indispensable pour que le XAML puisse voir la liste "Books" et "FilterTags"
             BindingContext = this;
+        }
 
-            // Charger les livres existants au démarrage
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
             LoadSavedBooks();
         }
 
@@ -35,16 +42,18 @@ namespace P_AppMobile_ReadMe
             try
             {
                 var savedBooks = await _bookService.LoadBooksAsync();
-                foreach (var book in savedBooks)
-                {
-                    Books.Add(book);
-                }
-                ApplySort();
+                _allBooks = savedBooks ?? new List<Book>();
+
+                // Mettre à jour la barre de filtres
+                UpdateFilterTags();
+
+                // Appliquer les filtres et le tri actuels
+                ApplyFilterAndSort();
 
                 // Téléchargement et extraction en arrière-plan des couvertures/fichiers manquants
                 _ = Task.Run(async () =>
                 {
-                    foreach (var book in savedBooks.ToList())
+                    foreach (var book in _allBooks.ToList())
                     {
                         if (string.IsNullOrEmpty(book.CoverImagePath) || !File.Exists(book.CoverImagePath))
                         {
@@ -54,10 +63,23 @@ namespace P_AppMobile_ReadMe
                                 // Mettre à jour l'UI sur le thread principal
                                 MainThread.BeginInvokeOnMainThread(() =>
                                 {
-                                    var index = Books.IndexOf(book);
-                                    if (index >= 0)
+                                    // Mettre à jour le chemin local du livre dans _allBooks
+                                    var existingAll = _allBooks.FirstOrDefault(b => b.Id == book.Id);
+                                    if (existingAll != null)
                                     {
-                                        Books[index] = book;
+                                        existingAll.CoverImagePath = book.CoverImagePath;
+                                        existingAll.FilePath = book.FilePath;
+                                    }
+
+                                    // Si le livre est actuellement visible dans la liste filtrée, le notifier
+                                    var visibleBook = Books.FirstOrDefault(b => b.Id == book.Id);
+                                    if (visibleBook != null)
+                                    {
+                                        var index = Books.IndexOf(visibleBook);
+                                        if (index >= 0)
+                                        {
+                                            Books[index] = book;
+                                        }
                                     }
                                 });
                             }
@@ -78,18 +100,81 @@ namespace P_AppMobile_ReadMe
         private void OnSortClicked(object sender, EventArgs e)
         {
             _isAscending = !_isAscending;
-            ApplySort();
+            ApplyFilterAndSort();
         }
 
-        private void ApplySort()
+        private void UpdateFilterTags()
         {
-            if (Books.Count <= 1) return;
+            TagsFilterLayout.Children.Clear();
+
+            // Récupérer tous les tags uniques
+            var uniqueTags = _allBooks
+                .Where(b => b.Tags != null)
+                .SelectMany(b => b.Tags)
+                .Distinct()
+                .OrderBy(t => t)
+                .ToList();
+
+            var tagsList = new List<string> { "Tous" };
+            tagsList.AddRange(uniqueTags);
+
+            // Si le tag sélectionné n'existe plus, on repasse à "Tous"
+            if (!tagsList.Contains(_selectedTag))
+            {
+                _selectedTag = "Tous";
+            }
+
+            foreach (var tag in tagsList)
+            {
+                bool isSelected = tag == _selectedTag;
+
+                var border = new Border
+                {
+                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = new CornerRadius(18) },
+                    Stroke = Color.FromArgb("#512BD4"),
+                    StrokeThickness = 1,
+                    Padding = new Thickness(15, 6),
+                    BackgroundColor = isSelected ? Color.FromArgb("#512BD4") : Colors.White,
+                    HorizontalOptions = LayoutOptions.Start,
+                    VerticalOptions = LayoutOptions.Center
+                };
+
+                var label = new Label
+                {
+                    Text = tag,
+                    TextColor = isSelected ? Colors.White : Color.FromArgb("#512BD4"),
+                    FontSize = 14,
+                    FontAttributes = FontAttributes.Bold,
+                    VerticalOptions = LayoutOptions.Center
+                };
+
+                border.Content = label;
+
+                // Geste de clic pour appliquer le filtre
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) =>
+                {
+                    _selectedTag = tag;
+                    UpdateFilterTags();
+                    ApplyFilterAndSort();
+                };
+                border.GestureRecognizers.Add(tapGesture);
+
+                TagsFilterLayout.Children.Add(border);
+            }
+        }
+
+        private void ApplyFilterAndSort()
+        {
+            var filtered = _selectedTag == "Tous"
+                ? _allBooks
+                : _allBooks.Where(b => b.Tags != null && b.Tags.Contains(_selectedTag, StringComparer.OrdinalIgnoreCase)).ToList();
 
             var sortedList = _isAscending
-                ? Books.OrderBy(b => b.DateAdded).ToList()
-                : Books.OrderByDescending(b => b.DateAdded).ToList();
+                ? filtered.OrderBy(b => b.DateAdded).ToList()
+                : filtered.OrderByDescending(b => b.DateAdded).ToList();
 
-            // Vider et re-remplir pour notifier l'UI
+            // Mettre à jour la collection Books de manière à rafraîchir l'UI
             Books.Clear();
             foreach (var book in sortedList)
             {
@@ -121,8 +206,9 @@ namespace P_AppMobile_ReadMe
                     // Uploader via l'API (ceci copie également localement et extrait la couverture)
                     var newBook = await _bookService.UploadBookAsync(result);
 
-                    Books.Add(newBook);
-                    ApplySort(); // Maintenir le tri après ajout
+                    _allBooks.Add(newBook);
+                    UpdateFilterTags();
+                    ApplyFilterAndSort();
                 }
             }
             catch (Exception ex)
@@ -184,8 +270,14 @@ namespace P_AppMobile_ReadMe
                     // 4. Supprimer du serveur (et nettoyer localement)
                     await _bookService.DeleteBookAsync(bookToDelete.Id);
 
-                    // 5. Retirer de la liste affichée
-                    Books.Remove(bookToDelete);
+                    // 5. Retirer de la liste globale et mettre à jour
+                    var bookInList = _allBooks.FirstOrDefault(b => b.Id == bookToDelete.Id);
+                    if (bookInList != null)
+                    {
+                        _allBooks.Remove(bookInList);
+                    }
+                    UpdateFilterTags();
+                    ApplyFilterAndSort();
                 }
                 catch (Exception ex)
                 {

@@ -4,7 +4,7 @@
              x:Class="P_AppMobile_ReadMe.MainPage"
              BackgroundColor="White">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="20,15,20,5">
             <VerticalStackLayout Grid.Column="0" Spacing="5">
                 <Label Text="Tous les livres" FontSize="22" FontAttributes="Bold" TextColor="Black" />
@@ -19,7 +19,14 @@
                     VerticalOptions="Center" />
         </Grid>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Books}" SelectionMode="None">
+        <!-- Barre de filtres par tags -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" HeightRequest="45" Margin="15,0,15,10">
+            <HorizontalStackLayout x:Name="TagsFilterLayout" Spacing="8" VerticalOptions="Center">
+                <!-- Rempli dynamiquement en C# -->
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Books}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame CornerRadius="10" BorderColor="#D3D3D3" Padding="10" Margin="15,5" BackgroundColor="White" HasShadow="False">
@@ -33,6 +40,7 @@
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                 <Label Text="{Binding Title}" FontSize="18" TextColor="Black" FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" />
                                 <Label Text="{Binding DisplayDate}" FontSize="12" TextColor="Gray" />
+                                <Label Text="{Binding TagsText}" FontSize="11" TextColor="#512BD4" FontAttributes="Italic" MaxLines="1" LineBreakMode="TailTruncation" IsVisible="{Binding HasTags}" Margin="0,2,0,0" />
                                 <VerticalStackLayout.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnBookTapped" />
                                 </VerticalStackLayout.GestureRecognizers>
@@ -53,7 +61,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="2" Text="Importer un livre" Clicked="OnImportClicked" Margin="20" BackgroundColor="#512BD4" TextColor="White" />
+        <Button Grid.Row="3" Text="Importer un livre" Clicked="OnImportClicked" Margin="20" BackgroundColor="#512BD4" TextColor="White" />
     </Grid>
 
 </ContentPage>

@@ -10,10 +10,10 @@
         
         <!-- Header -->
         <Grid Grid.Row="0" ColumnDefinitions="40, *, 40" Margin="0,0,0,20" VerticalOptions="Center">
-            <!-- Hamburger menu -->
-            <Label Grid.Column="0" Text="&#x2630;" FontSize="28" TextColor="#512BD4" VerticalOptions="Center" HorizontalOptions="Center">
+            <!-- Tags button -->
+            <Label Grid.Column="0" Text="🏷️" FontSize="26" TextColor="#512BD4" VerticalOptions="Center" HorizontalOptions="Center">
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuTapped" />
+                    <TapGestureRecognizer Tapped="OnTagsButtonClicked" />
                 </Label.GestureRecognizers>
             </Label>
             
@@ -54,6 +54,47 @@
             <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PageIndicator}" TextColor="Black" HorizontalOptions="Center" Margin="0,10,0,0" FontSize="14" />
         </Grid>
 
+        <!-- Tags Management Overlay Panel -->
+        <Border Grid.RowSpan="4" 
+                IsVisible="{Binding IsTagsPanelVisible}"
+                BackgroundColor="White" 
+                StrokeShape="RoundRectangle 20"
+                Stroke="#512BD4"
+                StrokeThickness="2"
+                Margin="10,40"
+                Padding="20"
+                VerticalOptions="Center"
+                HorizontalOptions="Fill">
+            
+            <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
+                <!-- Title -->
+                <Label Grid.Row="0" Text="Gérer les tags" FontSize="20" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" />
+                
+                <!-- Tags List -->
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Tags de ce livre :" FontAttributes="Bold" TextColor="Black" FontSize="14" />
+                        <FlexLayout x:Name="BookTagsFlexLayout" Wrap="Wrap" Direction="Row" JustifyContent="Start" AlignItems="Center" AlignContent="Start">
+                            <!-- Populated dynamically in C# -->
+                        </FlexLayout>
+                        
+                        <Label Text="Tous les autres tags existants (cliquer pour associer) :" FontAttributes="Bold" TextColor="Gray" FontSize="13" Margin="0,10,0,0" />
+                        <FlexLayout x:Name="AllTagsFlexLayout" Wrap="Wrap" Direction="Row" JustifyContent="Start" AlignItems="Center" AlignContent="Start">
+                            <!-- Populated dynamically in C# -->
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </ScrollView>
+                
+                <!-- Add Tag Entry -->
+                <Grid Grid.Row="2" ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                    <Entry Grid.Column="0" x:Name="NewTagEntry" Placeholder="Nouveau tag..." TextColor="Black" PlaceholderColor="Gray" />
+                    <Button Grid.Column="1" Text="Ajouter" BackgroundColor="#512BD4" TextColor="White" Clicked="OnAddTagClicked" />
+                </Grid>
+                
+                <!-- Close Button -->
+                <Button Grid.Row="3" Text="Fermer" BackgroundColor="Gray" TextColor="White" Clicked="OnCloseTagsPanelClicked" />
+            </Grid>
+        </Border>
     </Grid>
 
 </ContentPage>
