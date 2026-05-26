@@ -37,7 +37,10 @@ namespace P_AppMobile_ReadMe.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _metadataFilePath;
-        private const string ApiBaseUrl = "http://localhost:3000";
+        private static readonly string ApiBaseUrl = 
+            Microsoft.Maui.Devices.DeviceInfo.Platform == Microsoft.Maui.Devices.DevicePlatform.Android
+                ? "http://10.0.2.2:3000"
+                : "http://localhost:3000";
 
         public BookService()
         {
