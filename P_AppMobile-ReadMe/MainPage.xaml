@@ -46,15 +46,20 @@
                                 </VerticalStackLayout.GestureRecognizers>
                             </VerticalStackLayout>
 
-                            <Button Grid.Column="2"
-                            Text="🗑"
-                            FontSize="20"
-                            BackgroundColor="Transparent"
-                            TextColor="Red" 
-                            VerticalOptions="Center"
-                            HorizontalOptions="End"
-                            Clicked="OnDeleteBookClicked"
-                            CommandParameter="{Binding .}" />
+                            <HorizontalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center" HorizontalOptions="End">
+                                <Button Text="🏷️"
+                                        FontSize="18"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#512BD4"
+                                        Clicked="OnManageTagsClicked"
+                                        CommandParameter="{Binding .}" />
+                                <Button Text="🗑"
+                                        FontSize="20"
+                                        BackgroundColor="Transparent"
+                                        TextColor="Red" 
+                                        Clicked="OnDeleteBookClicked"
+                                        CommandParameter="{Binding .}" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </Frame>
                 </DataTemplate>
@@ -62,6 +67,48 @@
         </CollectionView>
 
         <Button Grid.Row="3" Text="Importer un livre" Clicked="OnImportClicked" Margin="20" BackgroundColor="#512BD4" TextColor="White" />
+
+        <!-- Tags Management Overlay Panel -->
+        <Border Grid.RowSpan="4" 
+                IsVisible="{Binding IsTagsPanelVisible}"
+                BackgroundColor="White" 
+                StrokeShape="RoundRectangle 20"
+                Stroke="#512BD4"
+                StrokeThickness="2"
+                Margin="10,40"
+                Padding="20"
+                VerticalOptions="Center"
+                HorizontalOptions="Fill">
+            
+            <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
+                <!-- Title -->
+                <Label Grid.Row="0" Text="Gérer les tags" FontSize="20" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" />
+                
+                <!-- Tags List -->
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Tags de ce livre :" FontAttributes="Bold" TextColor="Black" FontSize="14" />
+                        <FlexLayout x:Name="BookTagsFlexLayout" Wrap="Wrap" Direction="Row" JustifyContent="Start" AlignItems="Center" AlignContent="Start">
+                            <!-- Populated dynamically in C# -->
+                        </FlexLayout>
+                        
+                        <Label Text="Tous les autres tags existants (cliquer pour associer) :" FontAttributes="Bold" TextColor="Gray" FontSize="13" Margin="0,10,0,0" />
+                        <FlexLayout x:Name="AllTagsFlexLayout" Wrap="Wrap" Direction="Row" JustifyContent="Start" AlignItems="Center" AlignContent="Start">
+                            <!-- Populated dynamically in C# -->
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </ScrollView>
+                
+                <!-- Add Tag Entry -->
+                <Grid Grid.Row="2" ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                    <Entry Grid.Column="0" x:Name="NewTagEntry" Placeholder="Nouveau tag..." TextColor="Black" PlaceholderColor="Gray" />
+                    <Button Grid.Column="1" Text="Ajouter" BackgroundColor="#512BD4" TextColor="White" Clicked="OnAddTagClicked" />
+                </Grid>
+                
+                <!-- Close Button -->
+                <Button Grid.Row="3" Text="Fermer" BackgroundColor="Gray" TextColor="White" Clicked="OnCloseTagsPanelClicked" />
+            </Grid>
+        </Border>
     </Grid>
 
 </ContentPage>

@@ -20,6 +20,20 @@ namespace P_AppMobile_ReadMe
         private string _selectedTag = "Tous";
         private bool _isAscending = false; // Par défaut, les plus récents en premier
 
+        private Book? _editingBook;
+        public Book? EditingBook
+        {
+            get => _editingBook;
+            set { _editingBook = value; OnPropertyChanged(); }
+        }
+
+        private bool _isTagsPanelVisible;
+        public bool IsTagsPanelVisible
+        {
+            get => _isTagsPanelVisible;
+            set { _isTagsPanelVisible = value; OnPropertyChanged(); }
+        }
+
         public MainPage()
         {
             InitializeComponent();
@@ -283,6 +297,199 @@ namespace P_AppMobile_ReadMe
                 {
                     await DisplayAlert("Erreur", $"Impossible de supprimer le livre du serveur : {ex.Message}", "OK");
                 }
+            }
+        }
+
+        private void OnManageTagsClicked(object sender, EventArgs e)
+        {
+            var button = (Button)sender;
+            var book = (Book)button.CommandParameter;
+            if (book == null) return;
+
+            EditingBook = book;
+            IsTagsPanelVisible = true;
+            PopulateBookTags();
+        }
+
+        private void OnCloseTagsPanelClicked(object sender, EventArgs e)
+        {
+            IsTagsPanelVisible = false;
+            EditingBook = null;
+            UpdateFilterTags();
+            ApplyFilterAndSort();
+        }
+
+        private void RefreshBookInList(Book book)
+        {
+            var visibleBook = Books.FirstOrDefault(b => b.Id == book.Id);
+            if (visibleBook != null)
+            {
+                var index = Books.IndexOf(visibleBook);
+                if (index >= 0)
+                {
+                    // Create a shallow copy of the Book to ensure the reference changes, forcing MAUI to rebind the item
+                    var refreshedBook = new Book
+                    {
+                        Id = book.Id,
+                        Title = book.Title,
+                        FileName = book.FileName,
+                        FilePath = book.FilePath,
+                        CoverImagePath = book.CoverImagePath,
+                        DateAdded = book.DateAdded,
+                        LastPageRead = book.LastPageRead,
+                        Tags = book.Tags
+                    };
+
+                    // Also update the book reference in our main list _allBooks
+                    var allBooksIndex = _allBooks.FindIndex(b => b.Id == book.Id);
+                    if (allBooksIndex >= 0)
+                    {
+                        _allBooks[allBooksIndex] = refreshedBook;
+                    }
+                    if (EditingBook?.Id == book.Id)
+                    {
+                        EditingBook = refreshedBook;
+                    }
+
+                    Books[index] = refreshedBook;
+                }
+            }
+        }
+
+        private async void OnAddTagClicked(object sender, EventArgs e)
+        {
+            var newTag = NewTagEntry.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(newTag)) return;
+
+            if (EditingBook != null)
+            {
+                await _bookService.AddTagToBookAsync(EditingBook.Id, newTag);
+                if (EditingBook.Tags == null)
+                {
+                    EditingBook.Tags = new List<string>();
+                }
+                if (!EditingBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+                {
+                    EditingBook.Tags.Add(newTag);
+                }
+                NewTagEntry.Text = string.Empty;
+                RefreshBookInList(EditingBook);
+                PopulateBookTags();
+            }
+        }
+
+        private async void PopulateBookTags()
+        {
+            BookTagsFlexLayout.Children.Clear();
+            AllTagsFlexLayout.Children.Clear();
+            
+            if (EditingBook == null) return;
+
+            // 1. Populate current book's tags
+            if (EditingBook.Tags != null)
+            {
+                foreach (var tag in EditingBook.Tags.ToList())
+                {
+                    var border = new Border
+                    {
+                        StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = new CornerRadius(12) },
+                        Stroke = Brush.Transparent,
+                        BackgroundColor = Color.FromArgb("#F0EEFF"),
+                        Padding = new Thickness(10, 5),
+                        Margin = new Thickness(4),
+                        HorizontalOptions = LayoutOptions.Start
+                    };
+
+                    var layout = new HorizontalStackLayout { Spacing = 5 };
+                    
+                    var label = new Label 
+                    { 
+                        Text = tag, 
+                        TextColor = Color.FromArgb("#512BD4"), 
+                        FontSize = 13,
+                        VerticalOptions = LayoutOptions.Center 
+                    };
+                    
+                    var deleteBtn = new Label 
+                    { 
+                        Text = "✕", 
+                        TextColor = Colors.Red, 
+                        FontSize = 13, 
+                        FontAttributes = FontAttributes.Bold,
+                        VerticalOptions = LayoutOptions.Center,
+                        Margin = new Thickness(3, 0, 0, 0)
+                    };
+
+                    var tapGesture = new TapGestureRecognizer();
+                    tapGesture.Tapped += async (s, e) =>
+                    {
+                        await _bookService.RemoveTagFromBookAsync(EditingBook.Id, tag);
+                        EditingBook.Tags.Remove(tag);
+                        RefreshBookInList(EditingBook);
+                        PopulateBookTags();
+                    };
+                    deleteBtn.GestureRecognizers.Add(tapGesture);
+
+                    layout.Children.Add(label);
+                    layout.Children.Add(deleteBtn);
+                    border.Content = layout;
+
+                    BookTagsFlexLayout.Children.Add(border);
+                }
+            }
+
+            // 2. Populate all other available tags in the library
+            try
+            {
+                var allTags = await _bookService.GetAllTagsAsync();
+                var currentBookTags = EditingBook.Tags ?? new List<string>();
+                var otherTags = allTags.Where(t => !currentBookTags.Contains(t, StringComparer.OrdinalIgnoreCase)).ToList();
+
+                foreach (var tag in otherTags)
+                {
+                    var border = new Border
+                    {
+                        StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = new CornerRadius(12) },
+                        Stroke = Color.FromArgb("#512BD4"),
+                        StrokeThickness = 1,
+                        BackgroundColor = Colors.White,
+                        Padding = new Thickness(10, 5),
+                        Margin = new Thickness(4),
+                        HorizontalOptions = LayoutOptions.Start
+                    };
+
+                    var label = new Label 
+                    { 
+                        Text = tag, 
+                        TextColor = Color.FromArgb("#512BD4"), 
+                        FontSize = 13,
+                        VerticalOptions = LayoutOptions.Center 
+                    };
+
+                    var tapGesture = new TapGestureRecognizer();
+                    tapGesture.Tapped += async (s, e) =>
+                    {
+                        await _bookService.AddTagToBookAsync(EditingBook.Id, tag);
+                        if (EditingBook.Tags == null)
+                        {
+                            EditingBook.Tags = new List<string>();
+                        }
+                        if (!EditingBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                        {
+                            EditingBook.Tags.Add(tag);
+                        }
+                        RefreshBookInList(EditingBook);
+                        PopulateBookTags();
+                    };
+                    border.GestureRecognizers.Add(tapGesture);
+                    border.Content = label;
+
+                    AllTagsFlexLayout.Children.Add(border);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading all tags: {ex.Message}");
             }
         }
     }
