@@ -190,6 +190,8 @@ public partial class DetailPage : ContentPage
         set { _isTagsPanelVisible = value; OnPropertyChanged(); }
     }
 
+    private int _populatingTagsVersion = 0;
+
     private void OnTagsButtonClicked(object sender, TappedEventArgs e)
     {
         IsTagsPanelVisible = true;
@@ -208,31 +210,47 @@ public partial class DetailPage : ContentPage
 
         if (SelectedBook != null)
         {
-            await _bookService.AddTagToBookAsync(SelectedBook.Id, newTag);
-            if (SelectedBook.Tags == null)
+            var currentBook = SelectedBook;
+            NewTagEntry.Text = string.Empty; // Clear immediately
+            
+            try
             {
-                SelectedBook.Tags = new List<string>();
+                await _bookService.AddTagToBookAsync(currentBook.Id, newTag);
+                if (SelectedBook == currentBook)
+                {
+                    if (currentBook.Tags == null)
+                    {
+                        currentBook.Tags = new List<string>();
+                    }
+                    if (!currentBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+                    {
+                        currentBook.Tags.Add(newTag);
+                    }
+                    PopulateBookTags();
+                }
             }
-            if (!SelectedBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+            catch (Exception ex)
             {
-                SelectedBook.Tags.Add(newTag);
+                System.Diagnostics.Debug.WriteLine($"Error adding new tag: {ex.Message}");
             }
-            NewTagEntry.Text = string.Empty;
-            PopulateBookTags();
         }
     }
 
     private async void PopulateBookTags()
     {
+        if (SelectedBook == null) return;
+        var currentBook = SelectedBook;
+
+        // Increment version to discard outdated async calls
+        int version = ++_populatingTagsVersion;
+
         BookTagsFlexLayout.Children.Clear();
         AllTagsFlexLayout.Children.Clear();
         
-        if (SelectedBook == null) return;
-
         // 1. Populate current book's tags
-        if (SelectedBook.Tags != null)
+        if (currentBook.Tags != null)
         {
-            foreach (var tag in SelectedBook.Tags.ToList())
+            foreach (var tag in currentBook.Tags.ToList())
             {
                 var border = new Border
                 {
@@ -267,9 +285,22 @@ public partial class DetailPage : ContentPage
                 var tapGesture = new TapGestureRecognizer();
                 tapGesture.Tapped += async (s, e) =>
                 {
-                    await _bookService.RemoveTagFromBookAsync(SelectedBook.Id, tag);
-                    SelectedBook.Tags.Remove(tag);
-                    PopulateBookTags();
+                    if (SelectedBook != currentBook || _populatingTagsVersion != version) return;
+                    
+                    deleteBtn.IsEnabled = false;
+                    try
+                    {
+                        await _bookService.RemoveTagFromBookAsync(currentBook.Id, tag);
+                        if (SelectedBook == currentBook)
+                        {
+                            currentBook.Tags.Remove(tag);
+                            PopulateBookTags();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error removing tag: {ex.Message}");
+                    }
                 };
                 deleteBtn.GestureRecognizers.Add(tapGesture);
 
@@ -285,7 +316,11 @@ public partial class DetailPage : ContentPage
         try
         {
             var allTags = await _bookService.GetAllTagsAsync();
-            var currentBookTags = SelectedBook.Tags ?? new List<string>();
+            
+            // Check if the user closed the panel, switched books, or started another load after the await
+            if (SelectedBook != currentBook || version != _populatingTagsVersion) return;
+
+            var currentBookTags = currentBook.Tags ?? new List<string>();
             var otherTags = allTags.Where(t => !currentBookTags.Contains(t, StringComparer.OrdinalIgnoreCase)).ToList();
 
             foreach (var tag in otherTags)
@@ -312,16 +347,29 @@ public partial class DetailPage : ContentPage
                 var tapGesture = new TapGestureRecognizer();
                 tapGesture.Tapped += async (s, e) =>
                 {
-                    await _bookService.AddTagToBookAsync(SelectedBook.Id, tag);
-                    if (SelectedBook.Tags == null)
+                    if (SelectedBook != currentBook || _populatingTagsVersion != version) return;
+                    
+                    border.IsEnabled = false;
+                    try
                     {
-                        SelectedBook.Tags = new List<string>();
+                        await _bookService.AddTagToBookAsync(currentBook.Id, tag);
+                        if (SelectedBook == currentBook)
+                        {
+                            if (currentBook.Tags == null)
+                            {
+                                currentBook.Tags = new List<string>();
+                            }
+                            if (!currentBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                            {
+                                currentBook.Tags.Add(tag);
+                            }
+                            PopulateBookTags();
+                        }
                     }
-                    if (!SelectedBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                    catch (Exception ex)
                     {
-                        SelectedBook.Tags.Add(tag);
+                        System.Diagnostics.Debug.WriteLine($"Error adding tag: {ex.Message}");
                     }
-                    PopulateBookTags();
                 };
                 border.GestureRecognizers.Add(tapGesture);
                 border.Content = label;

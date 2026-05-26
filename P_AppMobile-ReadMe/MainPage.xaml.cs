@@ -34,6 +34,8 @@ namespace P_AppMobile_ReadMe
             set { _isTagsPanelVisible = value; OnPropertyChanged(); }
         }
 
+        private int _populatingTagsVersion = 0;
+
         public MainPage()
         {
             InitializeComponent();
@@ -363,32 +365,48 @@ namespace P_AppMobile_ReadMe
 
             if (EditingBook != null)
             {
-                await _bookService.AddTagToBookAsync(EditingBook.Id, newTag);
-                if (EditingBook.Tags == null)
+                var currentBook = EditingBook;
+                NewTagEntry.Text = string.Empty; // Clear input immediately for better UX
+                
+                try
                 {
-                    EditingBook.Tags = new List<string>();
+                    await _bookService.AddTagToBookAsync(currentBook.Id, newTag);
+                    if (EditingBook == currentBook)
+                    {
+                        if (currentBook.Tags == null)
+                        {
+                            currentBook.Tags = new List<string>();
+                        }
+                        if (!currentBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+                        {
+                            currentBook.Tags.Add(newTag);
+                        }
+                        RefreshBookInList(currentBook);
+                        PopulateBookTags();
+                    }
                 }
-                if (!EditingBook.Tags.Contains(newTag, StringComparer.OrdinalIgnoreCase))
+                catch (Exception ex)
                 {
-                    EditingBook.Tags.Add(newTag);
+                    System.Diagnostics.Debug.WriteLine($"Error adding new tag: {ex.Message}");
                 }
-                NewTagEntry.Text = string.Empty;
-                RefreshBookInList(EditingBook);
-                PopulateBookTags();
             }
         }
 
         private async void PopulateBookTags()
         {
+            if (EditingBook == null) return;
+            var currentBook = EditingBook;
+            
+            // Increment version to discard outdated async calls
+            int version = ++_populatingTagsVersion;
+
             BookTagsFlexLayout.Children.Clear();
             AllTagsFlexLayout.Children.Clear();
-            
-            if (EditingBook == null) return;
 
             // 1. Populate current book's tags
-            if (EditingBook.Tags != null)
+            if (currentBook.Tags != null)
             {
-                foreach (var tag in EditingBook.Tags.ToList())
+                foreach (var tag in currentBook.Tags.ToList())
                 {
                     var border = new Border
                     {
@@ -423,10 +441,23 @@ namespace P_AppMobile_ReadMe
                     var tapGesture = new TapGestureRecognizer();
                     tapGesture.Tapped += async (s, e) =>
                     {
-                        await _bookService.RemoveTagFromBookAsync(EditingBook.Id, tag);
-                        EditingBook.Tags.Remove(tag);
-                        RefreshBookInList(EditingBook);
-                        PopulateBookTags();
+                        if (EditingBook != currentBook || _populatingTagsVersion != version) return;
+                        
+                        deleteBtn.IsEnabled = false;
+                        try
+                        {
+                            await _bookService.RemoveTagFromBookAsync(currentBook.Id, tag);
+                            if (EditingBook == currentBook)
+                            {
+                                currentBook.Tags.Remove(tag);
+                                RefreshBookInList(currentBook);
+                                PopulateBookTags();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error removing tag: {ex.Message}");
+                        }
                     };
                     deleteBtn.GestureRecognizers.Add(tapGesture);
 
@@ -442,7 +473,11 @@ namespace P_AppMobile_ReadMe
             try
             {
                 var allTags = await _bookService.GetAllTagsAsync();
-                var currentBookTags = EditingBook.Tags ?? new List<string>();
+                
+                // If the user closed the panel, switched books, or started another load, discard this result
+                if (EditingBook != currentBook || version != _populatingTagsVersion) return;
+
+                var currentBookTags = currentBook.Tags ?? new List<string>();
                 var otherTags = allTags.Where(t => !currentBookTags.Contains(t, StringComparer.OrdinalIgnoreCase)).ToList();
 
                 foreach (var tag in otherTags)
@@ -469,17 +504,30 @@ namespace P_AppMobile_ReadMe
                     var tapGesture = new TapGestureRecognizer();
                     tapGesture.Tapped += async (s, e) =>
                     {
-                        await _bookService.AddTagToBookAsync(EditingBook.Id, tag);
-                        if (EditingBook.Tags == null)
+                        if (EditingBook != currentBook || _populatingTagsVersion != version) return;
+                        
+                        border.IsEnabled = false;
+                        try
                         {
-                            EditingBook.Tags = new List<string>();
+                            await _bookService.AddTagToBookAsync(currentBook.Id, tag);
+                            if (EditingBook == currentBook)
+                            {
+                                if (currentBook.Tags == null)
+                                {
+                                    currentBook.Tags = new List<string>();
+                                }
+                                if (!currentBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    currentBook.Tags.Add(tag);
+                                }
+                                RefreshBookInList(currentBook);
+                                PopulateBookTags();
+                            }
                         }
-                        if (!EditingBook.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                        catch (Exception ex)
                         {
-                            EditingBook.Tags.Add(tag);
+                            System.Diagnostics.Debug.WriteLine($"Error adding tag: {ex.Message}");
                         }
-                        RefreshBookInList(EditingBook);
-                        PopulateBookTags();
                     };
                     border.GestureRecognizers.Add(tapGesture);
                     border.Content = label;

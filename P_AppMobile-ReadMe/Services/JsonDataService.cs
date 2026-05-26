@@ -118,10 +118,10 @@ namespace P_AppMobile_ReadMe.Services
 
         public async Task<List<string>> GetAllTagsAsync()
         {
-            var books = await LoadBooksAsync();
-            return books
-                .Where(b => b.Tags != null)
-                .SelectMany(b => b.Tags)
+            var metadataList = await LoadMetadataAsync();
+            return metadataList
+                .Where(m => m.Tags != null)
+                .SelectMany(m => m.Tags)
                 .Distinct()
                 .OrderBy(t => t)
                 .ToList();
@@ -132,20 +132,23 @@ namespace P_AppMobile_ReadMe.Services
             if (string.IsNullOrWhiteSpace(tag)) return;
             tag = tag.Trim();
 
-            var books = await LoadBooksAsync();
-            var book = books.FirstOrDefault(b => b.Id == bookId);
-            if (book != null)
+            var metadataList = await LoadMetadataAsync();
+            var meta = metadataList.FirstOrDefault(m => m.Id == bookId);
+            if (meta == null)
             {
-                if (book.Tags == null)
-                {
-                    book.Tags = new List<string>();
-                }
+                meta = new BookMetadata { Id = bookId };
+                metadataList.Add(meta);
+            }
 
-                if (!book.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
-                {
-                    book.Tags.Add(tag);
-                    await SaveBooksAsync(books);
-                }
+            if (meta.Tags == null)
+            {
+                meta.Tags = new List<string>();
+            }
+
+            if (!meta.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+            {
+                meta.Tags.Add(tag);
+                await SaveMetadataAsync(metadataList);
             }
         }
 
@@ -154,15 +157,15 @@ namespace P_AppMobile_ReadMe.Services
             if (string.IsNullOrWhiteSpace(tag)) return;
             tag = tag.Trim();
 
-            var books = await LoadBooksAsync();
-            var book = books.FirstOrDefault(b => b.Id == bookId);
-            if (book != null && book.Tags != null)
+            var metadataList = await LoadMetadataAsync();
+            var meta = metadataList.FirstOrDefault(m => m.Id == bookId);
+            if (meta != null && meta.Tags != null)
             {
-                var existingTag = book.Tags.FirstOrDefault(t => t.Equals(tag, StringComparison.OrdinalIgnoreCase));
+                var existingTag = meta.Tags.FirstOrDefault(t => t.Equals(tag, StringComparison.OrdinalIgnoreCase));
                 if (existingTag != null)
                 {
-                    book.Tags.Remove(existingTag);
-                    await SaveBooksAsync(books);
+                    meta.Tags.Remove(existingTag);
+                    await SaveMetadataAsync(metadataList);
                 }
             }
         }
