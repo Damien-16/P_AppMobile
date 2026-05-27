@@ -125,9 +125,10 @@
                        HorizontalOptions="Center"
                        TextColor="White" />
 
-                <!-- Stats Cards Row -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Frame Grid.Column="0"
+                <!-- Stats Cards -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                    <!-- Temps passé -->
+                    <Frame Grid.Row="0" Grid.Column="0"
                            BackgroundColor="#5D6AE8"
                            BorderColor="Transparent"
                            CornerRadius="16"
@@ -147,48 +148,69 @@
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Column="1"
+                    <!-- Pourcentage -->
+                    <Frame Grid.Row="0" Grid.Column="1"
                            BackgroundColor="#5D6AE8"
                            BorderColor="Transparent"
                            CornerRadius="16"
                            Padding="14">
                         <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                            <Label Text="✅" FontSize="22" HorizontalOptions="Center" />
+                            <Label Text="📈" FontSize="22" HorizontalOptions="Center" />
                             <Label x:Name="PercentageLabel"
                                    Text="33%"
                                    FontSize="17"
                                    FontAttributes="Bold"
                                    TextColor="White"
                                    HorizontalOptions="Center" />
-                            <Label Text="Correcte"
+                            <Label Text="Mémorisation"
+                                   FontSize="11"
+                                   TextColor="#C5CCFF"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- 100% Correct -->
+                    <Frame Grid.Row="1" Grid.Column="0"
+                           BackgroundColor="#5D6AE8"
+                           BorderColor="Transparent"
+                           CornerRadius="16"
+                           Padding="14">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="✅" FontSize="22" HorizontalOptions="Center" />
+                            <Label x:Name="PerfectCountLabel"
+                                   Text="5/10"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Connues à 100%"
+                                   FontSize="11"
+                                   TextColor="#C5CCFF"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Hardest Card -->
+                    <Frame Grid.Row="1" Grid.Column="1"
+                           BackgroundColor="#5D6AE8"
+                           BorderColor="Transparent"
+                           CornerRadius="16"
+                           Padding="14">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="❌" FontSize="22" HorizontalOptions="Center" />
+                            <Label x:Name="HardestCardLabel"
+                                   Text="Card"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Le plus dure"
                                    FontSize="11"
                                    TextColor="#C5CCFF"
                                    HorizontalOptions="Center" />
                         </VerticalStackLayout>
                     </Frame>
                 </Grid>
-
-                <!-- Hardest Card -->
-                <Frame BackgroundColor="#5D6AE8"
-                       BorderColor="Transparent"
-                       CornerRadius="16"
-                       Padding="14"
-                       WidthRequest="200"
-                       HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="❌" FontSize="22" HorizontalOptions="Center" />
-                        <Label x:Name="HardestCardLabel"
-                               Text="Card"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               TextColor="White"
-                               HorizontalOptions="Center" />
-                        <Label Text="Le plus dure"
-                               FontSize="11"
-                               TextColor="#C5CCFF"
-                               HorizontalOptions="Center" />
-                    </VerticalStackLayout>
-                </Frame>
             </VerticalStackLayout>
 
             <!-- Bottom Action Buttons -->

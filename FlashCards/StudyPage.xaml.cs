@@ -223,6 +223,7 @@ namespace FlashCards
             
             double percentage = (double)_correctCount / _sessionCards.Count * 100;
             PercentageLabel.Text = $"{Math.Round(percentage)}%";
+            PerfectCountLabel.Text = $"{_correctCount} / {_sessionCards.Count}";
 
             // Find hardest card
             if (_missedCount.Any())
